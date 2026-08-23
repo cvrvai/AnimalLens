@@ -52,8 +52,12 @@ def test_pig_recumbency_classification():
     assert adapter.classify_recumbency(bbox_sternal, velocity=0.0) == "sternal_recumbency"
 
     # Standing (upright, squarish aspect ratio)
-    bbox_standing = BoundingBox(x_min=0.1, y_min=0.2, x_max=0.3, y_max=0.4)  # w=0.2, h=0.2 -> ratio=1.0
+    bbox_standing = BoundingBox(x_min=0.1, y_min=0.1, x_max=0.3, y_max=0.3)  # w=0.2, h=0.2 -> ratio=1.0, y_max=0.3
     assert adapter.classify_recumbency(bbox_standing, velocity=0.0) == "standing"
+
+    # Rooting / Nesting (head lowered to pen floor grating, y_max > 0.50)
+    bbox_nesting = BoundingBox(x_min=0.25, y_min=0.16, x_max=0.60, y_max=0.57)
+    assert adapter.classify_recumbency(bbox_nesting, velocity=0.0) == "rooting_nesting"
 
 
 def test_pig_huddling_cold_stress_index():

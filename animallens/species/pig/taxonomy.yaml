@@ -7,16 +7,22 @@ categories:
       - standing
       - sternal_recumbency
       - lateral_recumbency
-      - sitting_dog_sitting
+      - sitting_upright
       - huddling_cold_stress
       - panting_heat_stress
+  exploration_nesting:
+    description: Exploratory rooting and pre-farrowing nest building
+    labels:
+      - rooting_exploration
+      - nesting_straw_rooting
+      - pen_sniffing
   locomotion:
-    description: Spatial movement and exploratory locomotion
+    description: Spatial movement and pen mobility
     labels:
       - walking
+      - turning_in_pen
       - running_gallop
       - trotting
-      - rooting_exploration
   feeding:
     description: Ingestion and oral stereotypic behaviors
     labels:

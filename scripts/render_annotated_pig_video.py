@@ -59,7 +59,7 @@ def main():
         cv2.addWeighted(hud_bg, 0.75, frame, 0.25, 0, frame)
 
         # Header info
-        cv2.putText(frame, f"AnimalLens Swine AI | Time: {time_sec:05.1f}s | FPS: {fps:.0f}", (15, 25),
+        cv2.putText(frame, f"AnimalLens Swine Vision AI | Time: {time_sec:05.1f}s | FPS: {fps:.0f}", (15, 24),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 255), 2, cv2.LINE_AA)
 
         if res.bboxes:
@@ -86,10 +86,10 @@ def main():
                 cv2.line(frame, (x1, y2), (x1 + d, y2), (0, 255, 255), 4)
                 cv2.line(frame, (x1, y2), (x1, y2 - d), (0, 255, 255), 4)
                 cv2.line(frame, (x2, y2), (x2 - d, y2), (0, 255, 255), 4)
-                cv2.line(frame, (x2, y2), (x2, y2 - d), (0, 255, 255), 4)
+                cv2.line(frame, (x2, y2), (x2 - d, y2), (0, 255, 255), 4)
 
-                # Label tag
-                label_text = f"Pig #{i+1}: {posture} ({conf:.0%})"
+                # Clean swine label tag
+                label_text = f"Pig #{i+1} (Sow): {posture.upper()} ({conf:.0%})"
                 (tw, th), _ = cv2.getTextSize(label_text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
                 cv2.rectangle(frame, (x1, max(0, y1 - 26)), (x1 + tw + 10, y1), (0, 220, 100), -1)
                 cv2.putText(frame, label_text, (x1 + 5, y1 - 7),
@@ -97,7 +97,8 @@ def main():
 
             # Top HUD details
             primary_posture = adapter.classify_recumbency(res.bboxes[0], velocity=0.0)
-            cv2.putText(frame, f"State: {primary_posture.upper()} | Subjects: {len(res.bboxes)}", (15, 47),
+            behavior_desc = "NESTING / SUBSTRATE ROOTING" if primary_posture == "rooting_nesting" else primary_posture.upper()
+            cv2.putText(frame, f"Behavior: {behavior_desc} | Species: Sus scrofa (Pig) | Count: {len(res.bboxes)}", (15, 47),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.55, (200, 255, 200), 1, cv2.LINE_AA)
 
         out_writer.write(frame)

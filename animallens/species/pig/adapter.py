@@ -1,6 +1,7 @@
 """
 Swine / Domestic Pig (Sus scrofa domesticus) species adapter.
-Provides clinical recumbency posture classification, commercial barn huddling index, and agonistic welfare analytics.
+Provides clinical recumbency posture classification, farrowing pen nesting/rooting ethology,
+commercial barn huddling index, and agonistic welfare analytics.
 """
 from __future__ import annotations
 
@@ -47,14 +48,18 @@ class PigAdapter(SpeciesAdapter):
                         "standing",
                         "sternal_recumbency",
                         "lateral_recumbency",
-                        "sitting_dog_sitting",
+                        "sitting_upright",
                         "huddling_cold_stress",
                         "panting_heat_stress",
                     ],
                 ),
+                "exploration_nesting": BehaviorCategory(
+                    name="exploration_nesting",
+                    labels=["rooting_exploration", "nesting_straw_rooting", "pen_sniffing"],
+                ),
                 "locomotion": BehaviorCategory(
                     name="locomotion",
-                    labels=["walking", "running_gallop", "trotting", "rooting_exploration"],
+                    labels=["walking", "turning_in_pen", "running_gallop", "trotting"],
                 ),
                 "feeding": BehaviorCategory(
                     name="feeding",
@@ -108,28 +113,37 @@ class PigAdapter(SpeciesAdapter):
         huddling_score = max(0.0, min(1.0, 1.0 - (avg_dist / 0.35)))
         return round(huddling_score, 3)
 
-    def classify_recumbency(self, bbox: Any, velocity: float = 0.0) -> str:
+    def classify_recumbency(self, bbox: Any, velocity: float = 0.0, head_y_offset: float = 0.0) -> str:
         """
-        Differentiates lateral lying (flat on side) vs sternal lying (chest down) based on aspect ratio.
+        Classifies swine posture and ethological activity from bounding geometry, velocity, and snout elevation.
         """
         if velocity > 0.3:
             return "walking"
 
         width = getattr(bbox, "width", 0.0)
         height = getattr(bbox, "height", 1.0)
+        y_max = getattr(bbox, "y_max", 0.5)
         aspect_ratio = width / max(height, 0.001)
 
+        # Lying lateral (flat on side, very wide aspect ratio)
         if aspect_ratio >= 1.8:
             return "lateral_recumbency"
-        elif aspect_ratio >= 1.2:
+        # Lying sternal (chest down, resting)
+        elif aspect_ratio >= 1.4:
             return "sternal_recumbency"
-        elif aspect_ratio >= 0.8:
+        # Upright standing with head down rooting/nesting on pen floor
+        elif y_max > 0.50 or head_y_offset > 0.05:
+            # Snout reaches down near the floor substrate (rooting / nesting behaviour)
+            return "rooting_nesting"
+        # Standard upright standing posture
+        elif aspect_ratio >= 0.70:
             return "standing"
+        # Haunches down sitting
         else:
-            return "sitting_dog_sitting"
+            return "sitting_upright"
 
     def extract_custom_features(self, tracks: List[Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract swine ethological features, thermal huddling index, and recumbency distribution."""
+        """Extract swine ethological features, thermal huddling index, and posture distribution."""
         huddling_idx = self.compute_huddling_index(tracks)
 
         postures = []

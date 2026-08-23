@@ -54,10 +54,12 @@ def main():
                     behavior = "Resting / Thermal Dissipation"
                 elif posture == "sternal_recumbency":
                     behavior = "Alert Rest / Sternal Inactive"
+                elif posture == "rooting_nesting":
+                    behavior = "Pre-Farrowing Nesting / Floor Straw Rooting"
                 elif posture == "standing":
                     behavior = "Active Upright / Pen Exploration"
                 else:
-                    behavior = "Dog-Sitting Posture"
+                    behavior = "Upright Sitting"
 
                 print(f"{time_sec:>6.1f}s    | {len(res.bboxes):>4} pigs    | {max_conf:>8.2f}   | {posture:<25} | {behavior}")
                 sampled_results.append({

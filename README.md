@@ -8,9 +8,9 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg)](https://fastapi.tiangolo.com)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 
-**AnimalLens** is an open-source animal behavior intelligence platform for images, recorded video, and real-time camera streams, with optional local LLM reasoning through Ollama.
+**AnimalLens** is an open-source animal behavior intelligence platform for images, recorded video, and real-time camera streams, with edge computer vision (YOLOv8 + BoT-SORT tracking + Kinematics) and optional local LLM reasoning through Ollama.
 
-> **AnimalLens is an open-source framework for building and deploying animal behavior intelligence. Redclaw crayfish (*Cherax quadricarinatus*) is the first species implementation.**
+> **AnimalLens supports pluggable multi-species ethology. Built-in adapters include Redclaw Crayfish (*Cherax quadricarinatus*) for smart aquaculture and Domestic Dog (*Canis lupus familiaris*) for canine posture, locomotion, and welfare tracking.**
 
 </div>
 
@@ -29,18 +29,19 @@ pip install animallens
 ```python
 from animallens import AnimalLens
 
-lens = AnimalLens(species="redclaw", reasoning="ollama:gemma3")
-result = lens.analyze("tank.mp4")
+# Analyze dog locomotion & posture
+lens = AnimalLens(species="dog", reasoning="ollama:gemma3")
+result = lens.analyze("data/raw/videos/dog_running.mp4")
 
 print(result.format_timeline_text())
 ```
 
 Output:
 ```text
-00:05:22 Feeding (conf: 0.91)
-00:14:01 Aggression (conf: 0.86)
-00:21:32 Social interaction (conf: 0.78)
-00:21:48 Mating (conf: 0.92)
+00:00:00 Posture.standing (conf: 0.85)
+00:00:01 Locomotion.walking (conf: 0.87)
+00:00:02 Locomotion.running_gallop (conf: 0.94)
+00:00:03 Social_behavior.play_bow (conf: 0.92)
 ```
 
 ---
@@ -320,15 +321,15 @@ Detailed technical, mathematical, and execution documentation is available in th
 ---
 
 ## Roadmap & Release Milestones
-
-- [x] **v0.1 — Phase 1** (Current): Platform architecture, Layer A/B decoupling, Redclaw species adapter, Developer Python SDK, Typer CLI (`doctor`, `models`, `analyze`), FastAPI REST/WS server, and rolling video buffer.
-- [ ] **v0.2**: Real Redclaw detector & tracker (YOLOv8 + BoT-SORT fine-tuned on aquaculture datasets).
-- [ ] **v0.3**: Temporal behavior recognition & action segmentation.
-- [ ] **v0.4**: Realtime camera behavior intelligence with low-latency event buffering.
-- [ ] **v0.5**: Redclaw breeding & reproduction behavior models (mating, courtship, egg-bearing).
-- [ ] **v0.6**: Automated Hugging Face Hub model distribution & caching.
-- [ ] **v0.7**: Multi-species expansion (`pig-behavior-v1`).
-- [ ] **v1.0**: Stable multi-species AnimalLens API & production benchmarks.
+ 
+- [x] **v0.1 — Phase 1**: Core platform architecture, Layer A/B decoupling, Redclaw species adapter, Developer Python SDK, Typer CLI (`doctor`, `models`, `analyze`), FastAPI REST/WS server, and rolling video buffer.
+- [x] **v0.2 — Phase 2**: Deep Learning Perception Engine (YOLOv8 Object Detector + BoT-SORT Kalman 8D Multi-Animal Tracker).
+- [x] **v0.3 — Phase 3**: Anti-leakage session partitioner (`animallens dataset split`) & Inter-rater Cohen's Kappa reliability validator.
+- [x] **v0.4 — Phase 4**: Temporal Action Segmentation & Kinematics Engine (velocity vectors, IID approach rate, swarm polarization, and hysteresis smoothing).
+- [x] **v0.5 — Phase 5**: Edge RTSP Streaming & Low-Latency Buffer Engine (<60ms latency, automatic reconnection).
+- [x] **v0.6 — Phase 6**: Layer B Ollama Multimodal Reasoning & Automated Uncertainty Triage Active Learning Loop.
+- [x] **v0.7 — Phase 7**: Multi-Species Expansion (Domestic Dog *Canis lupus familiaris*) & Hugging Face Hub Model Distribution.
+- [ ] **v1.0**: Production Multi-Camera Edge Cluster & Hardware Acceleration (TensorRT / OpenVINO).
 
 ---
 

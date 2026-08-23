@@ -51,6 +51,7 @@ class AnimalLens:
         tracker: Optional[BaseTracker] = None,
         ollama_base_url: Optional[str] = None,
         buffer_duration_seconds: float = 15.0,
+        storage: Optional[Any] = None,
     ) -> None:
         # Resolve species adapter
         if isinstance(species, SpeciesAdapter):
@@ -60,6 +61,9 @@ class AnimalLens:
 
         self.species_name = self.species_adapter.config.name
         self.model_name = model_name or self.species_adapter.config.default_model
+
+        # Resolve storage
+        self.storage = storage
 
         # Resolve reasoning provider
         self.reasoning: BaseReasoningProvider = get_reasoning_provider(
@@ -252,6 +256,23 @@ class AnimalLens:
             reasoning=reasoning_out,
         )
         self._last_result = result
+
+        # Auto-persist to MongoDB storage if configured
+        if self.storage is not None and detected_events:
+            try:
+                self.storage.save_events(detected_events)
+                session_meta = kwargs.get("session_metadata", {})
+                session_meta.update({
+                    "species": self.species_name,
+                    "source_uri": source.uri,
+                    "duration_seconds": last_ts,
+                    "events_count": len(detected_events),
+                })
+                self.storage.save_session(session_meta)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"MongoDB storage save error: {e}")
+
         return result
 
     def stream(

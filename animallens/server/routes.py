@@ -191,14 +191,94 @@ async def websocket_events_endpoint(websocket: WebSocket) -> None:
         ws_manager.disconnect(websocket)
 
 
-@router.get("/events/sse")
-async def sse_events_endpoint():
-    """Server-Sent Events (SSE) stream endpoint for behavior events."""
-    async def event_generator():
-        # Heartbeat SSE stream
-        yield f"data: {json.dumps({'type': 'stream.connected'})}\n\n"
-        while True:
-            await asyncio.sleep(5.0)
-            yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
-
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+# ---------------------------------------------------------------------------
+# MongoDB Storage & Ethological Analytics Endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/storage/status")
+async def storage_status() -> Dict[str, Any]:
+    """Check MongoDB storage connection status."""
+    from animallens.storage import get_storage
+    storage = get_storage()
+    connected = storage.is_connected()
+    return {
+        "status": "connected" if connected else "disconnected",
+        "database": storage.config.db_name,
+        "collections": {
+            "events": storage.config.events_collection,
+            "sessions": storage.config.sessions_collection,
+            "uncertainty": storage.config.uncertainty_collection,
+        },
+    }
+
+
+@router.get("/storage/events")
+async def query_stored_events(
+    species_id: Optional[str] = Query(None),
+    session_id: Optional[str] = Query(None),
+    category: Optional[str] = Query(None),
+    limit: int = Query(50, le=500),
+) -> List[Dict[str, Any]]:
+    """Query stored BehaviorEvents from MongoDB."""
+    from animallens.storage import get_storage
+    storage = get_storage()
+    return storage.get_events(species_id=species_id, session_id=session_id, category=category, limit=limit)
+
+
+@router.get("/analytics/transitions")
+async def get_transition_matrix_endpoint(
+    session_id: Optional[str] = Query(None),
+    species_id: Optional[str] = Query(None),
+) -> Dict[str, Any]:
+    """Retrieve Markov behavior state transition matrix computed by MongoDB aggregation."""
+    from animallens.storage import get_storage
+    storage = get_storage()
+    return storage.get_transition_matrix(session_id=session_id, species_id=species_id)
+
+
+@router.get("/analytics/circadian")
+async def get_circadian_budget_endpoint(
+    species_id: Optional[str] = Query(None),
+) -> List[Dict[str, Any]]:
+    """Retrieve 24h circadian activity time budget computed by MongoDB aggregation."""
+    from animallens.storage import get_storage
+    storage = get_storage()
+    return storage.get_circadian_budget(species_id=species_id)
+
+
+@router.get("/uncertainty")
+async def get_uncertainty_queue_endpoint(
+    verified: bool = Query(False),
+    limit: int = Query(50, le=200),
+) -> List[Dict[str, Any]]:
+    """Retrieve active learning review items from MongoDB uncertainty queue."""
+    from animallens.storage import get_storage
+    storage = get_storage()
+    return storage.get_uncertainty_queue(verified=verified, limit=limit)
+
+
+class VerifyUncertaintyRequest(BaseModel):
+    verified_label: str
+    verified_by: str = "human_expert"
+
+
+@router.post("/uncertainty/{unc_id}/verify")
+async def verify_uncertainty_endpoint(
+    unc_id: str,
+    req: VerifyUncertaintyRequest,
+) -> Dict[str, Any]:
+    """Verify an active learning candidate with human biologist label."""
+    from animallens.storage import get_storage
+    storage = get_storage()
+    success = storage.verify_uncertainty(
+        unc_id=unc_id,
+        verified_label=req.verified_label,
+        verified_by=req.verified_by,
+    )
+    if not success:
+        raise HTTPException(status_code=400, detail="Failed to verify uncertainty item.")
+    return {"status": "verified", "unc_id": unc_id, "verified_label": req.verified_label}
+

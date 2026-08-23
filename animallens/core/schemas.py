@@ -79,6 +79,7 @@ class SourceInfo(BaseModel):
     type: SourceType = Field(..., description="Source medium")
     uri: Optional[str] = Field(default=None, description="File path, URL, or stream URI")
     camera_id: Optional[str] = Field(default=None, description="Optional camera hardware identifier")
+    session_id: Optional[str] = Field(default=None, description="Video recording or stream session ID")
     fps: Optional[float] = Field(default=None, description="Video/stream frame rate")
     resolution: Optional[tuple[int, int]] = Field(default=None, description="(width, height)")
 

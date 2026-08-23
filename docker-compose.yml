@@ -1,20 +1,51 @@
 version: '3.8'
 
 services:
+  # AnimalLens Core Vision & Kinematics Microservice
   animallens:
-    build: .
-    container_name: animallens-server
-    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: animallens-engine
     ports:
-      - "8088:8088"
+      - "8000:8000"
     environment:
-      - ANIMALLENS_HOST=0.0.0.0
-      - ANIMALLENS_PORT=8088
-      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - ANIMALLENS_DEFAULT_SPECIES=dog
+      - ANIMALLENS_LOG_LEVEL=INFO
+      - MONGODB_URI=mongodb://mongo:27017
+      - MONGODB_DATABASE=animallens
+      - OLLAMA_BASE_URL=http://ollama:11434
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # Time-Series Event & Uncertainty Storage
+  mongo:
+    image: mongo:7.0
+    container_name: animallens-mongodb
+    ports:
+      - "27017:27017"
     volumes:
-      - animallens-cache:/root/.cache/animallens
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  # Local Multimodal LLM Reasoner (Optional)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: animallens-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
 
 volumes:
-  animallens-cache:
+  mongo_data:
+  ollama_data:

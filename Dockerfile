@@ -19,11 +19,11 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -e .
 
 # Expose API port
-EXPOSE 8088
+EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8088/v1/health || exit 1
+    CMD curl -f http://localhost:8000/v1/health || exit 1
 
 # Start server
-CMD ["animallens", "serve", "--host", "0.0.0.0", "--port", "8088"]
+CMD ["animallens", "serve", "--host", "0.0.0.0", "--port", "8000"]

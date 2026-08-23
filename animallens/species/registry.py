@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Type
 from animallens.core.exceptions import SpeciesNotFoundError
 from animallens.species.base import SpeciesAdapter
+from animallens.species.dog.adapter import DogAdapter
 from animallens.species.redclaw.adapter import RedclawAdapter
 
 
@@ -26,6 +27,11 @@ class SpeciesRegistry:
         self.register_alias("redclaw", "cherax_quadricarinatus")
         self.register_alias("redclaw_crayfish", "cherax_quadricarinatus")
         self.register_alias("crayfish", "cherax_quadricarinatus")
+
+        dog = DogAdapter()
+        self.register_adapter("canis_lupus_familiaris", dog)
+        self.register_alias("dog", "canis_lupus_familiaris")
+        self.register_alias("canine", "canis_lupus_familiaris")
 
     def register_adapter(self, species_id: str, adapter: SpeciesAdapter) -> None:
         """Register an instantiated SpeciesAdapter."""

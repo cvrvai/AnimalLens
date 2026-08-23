@@ -70,8 +70,9 @@ class StreamSource(BaseSource):
         os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;udp|fflags;nobuffer|flags;low_delay"
 
         while self._running:
-            if self._cv2 is None:
-                # Synthetic mode
+            is_mock = isinstance(self.endpoint, str) and any(kw in str(self.endpoint).lower() for kw in ("mock", "fake", "test", "dummy"))
+            if self._cv2 is None or is_mock:
+                # Synthetic / test mode
                 time.sleep(1.0 / self.fps)
                 dummy = Image.new("RGB", (640, 480), color=(15, 25, 35))
                 ts = time.time()

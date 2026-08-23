@@ -1,0 +1,50 @@
+version: 1.0.0
+categories:
+  posture:
+    name: posture
+    description: Static body postures and resting states
+    labels:
+      - standing
+      - sitting
+      - lying_sternal
+      - lying_lateral
+      - sleeping
+  locomotion:
+    name: locomotion
+    description: Dynamic gait and translational displacement
+    labels:
+      - walking
+      - trotting
+      - running_gallop
+      - jumping
+      - tail_wagging
+  social_behavior:
+    name: social_behavior
+    description: Interactive communication and social bonding
+    labels:
+      - play_bow
+      - sniffing_conspecific
+      - following
+      - mounting
+      - greeting
+  aggression:
+    name: aggression
+    description: Agonistic or territorial threat responses
+    labels:
+      - growling_stance
+      - aggressive_lunge
+      - biting_grapple
+      - defensive_retreat
+  maintenance:
+    name: maintenance
+    description: Basal maintenance and welfare behaviors
+    labels:
+      - eating
+      - drinking
+      - grooming_scratching
+      - panting
+  unknown:
+    name: unknown
+    description: Unclassified or ambiguous action
+    labels:
+      - unknown

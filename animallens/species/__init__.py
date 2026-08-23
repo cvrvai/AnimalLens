@@ -7,8 +7,9 @@ from animallens.species.base import (
     SpeciesAdapter,
     SpeciesConfig,
 )
-from animallens.species.registry import SpeciesRegistry, species_registry
+from animallens.species.dog.adapter import DogAdapter
 from animallens.species.redclaw.adapter import RedclawAdapter
+from animallens.species.registry import SpeciesRegistry, species_registry
 
 __all__ = [
     "BehaviorCategory",
@@ -18,4 +19,5 @@ __all__ = [
     "SpeciesRegistry",
     "species_registry",
     "RedclawAdapter",
+    "DogAdapter",
 ]

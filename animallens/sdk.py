@@ -77,6 +77,14 @@ class AnimalLens:
             if detector.lower() in ("yolo", "yolov8", "yolov8n", "yolov8s"):
                 from animallens.perception.models.yolov8_detector import YOLOv8Detector
                 resolved_detector = YOLOv8Detector()
+        elif resolved_detector is None:
+            import os
+            trained_weights = Path("data/trained_models/redclaw-behavior-v1.pt")
+            cache_weights = Path(os.path.expanduser("~/.cache/animallens/models/redclaw-behavior-v1/redclaw-behavior-v1.pt"))
+            weights_path = trained_weights if trained_weights.exists() else (cache_weights if cache_weights.exists() else None)
+            if weights_path and weights_path.exists():
+                from animallens.perception.models.yolov8_detector import YOLOv8Detector
+                resolved_detector = YOLOv8Detector(model_path=weights_path)
 
         # Resolve tracker
         resolved_tracker = tracker
@@ -84,6 +92,9 @@ class AnimalLens:
             if tracker.lower() in ("botsort", "bot_sort", "bytetrack", "kalman"):
                 from animallens.perception.models.botsort_tracker import BoTSORTTracker
                 resolved_tracker = BoTSORTTracker()
+        elif resolved_tracker is None:
+            from animallens.perception.models.botsort_tracker import BoTSORTTracker
+            resolved_tracker = BoTSORTTracker()
 
         # Build Layer A perception pipeline
         self.pipeline = PerceptionPipeline(

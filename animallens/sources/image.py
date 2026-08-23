@@ -29,6 +29,8 @@ class ImageSource(BaseSource):
         try:
             if isinstance(self.target, Image.Image):
                 self._image = self.target
+            elif hasattr(self.target, "shape") and hasattr(self.target, "dtype"):  # numpy array
+                self._image = Image.fromarray(self.target)
             elif isinstance(self.target, bytes):
                 self._image = Image.open(io.BytesIO(self.target)).convert("RGB")
             elif isinstance(self.target, (str, Path)):

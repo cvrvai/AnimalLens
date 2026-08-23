@@ -71,11 +71,25 @@ class AnimalLens:
             base_url=ollama_base_url,
         )
 
+        # Resolve detector
+        resolved_detector = detector
+        if isinstance(detector, str):
+            if detector.lower() in ("yolo", "yolov8", "yolov8n", "yolov8s"):
+                from animallens.perception.models.yolov8_detector import YOLOv8Detector
+                resolved_detector = YOLOv8Detector()
+
+        # Resolve tracker
+        resolved_tracker = tracker
+        if isinstance(tracker, str):
+            if tracker.lower() in ("botsort", "bot_sort", "bytetrack", "kalman"):
+                from animallens.perception.models.botsort_tracker import BoTSORTTracker
+                resolved_tracker = BoTSORTTracker()
+
         # Build Layer A perception pipeline
         self.pipeline = PerceptionPipeline(
             species_adapter=self.species_adapter,
-            detector=detector,
-            tracker=tracker,
+            detector=resolved_detector,
+            tracker=resolved_tracker,
             buffer_duration_seconds=buffer_duration_seconds,
         )
 

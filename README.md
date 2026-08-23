@@ -1,288 +1,256 @@
 <div align="center">
 
-# 🐕 AnimalLens
-### Open-Source Canine Behavior & Ethology Intelligence Library
+# 🐾 AnimalLens
+### Edge AI Animal Vision & Ethology Platform for Next.js & Modern Web Apps
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Next.js](https://img.shields.io/badge/Next.js-14%2F15-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18%2F19-61DAFB?logo=react)](https://react.dev/)
+[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)](https://www.docker.com/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg)](https://pytorch.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg)](https://fastapi.tiangolo.com)
-[![OpenCV](https://img.shields.io/badge/OpenCV-4.8+-5C3EE8.svg)](https://opencv.org/)
 
-**AnimalLens** is an open-source Python library for real-time animal computer vision, multi-object tracking, kinematics analysis, and ethological behavior classification.
+**AnimalLens** provides frame-accurate animal detection, multi-animal Kalman tracking, kinematic speed extraction, and ethological behavior classification directly into your **Next.js & React** web applications.
 
-Built for veterinary researchers, smart animal shelters, and AI developers. Features out-of-the-box **Domestic Dog (*Canis lupus familiaris*)** posture, locomotion, and welfare tracking.
+Features out-of-the-box **Canine Vision AI** (*Canis lupus familiaris*) detecting gait, speed in km/h, posture, and social interactions at **>60 FPS**.
 
 </div>
 
 ---
 
-## 📦 Installation
+## ⚡ Next.js 3-Minute Quickstart
 
-Install directly from GitHub via `pip`:
+Connect real-time animal vision intelligence to your Next.js application in 3 steps:
 
+### 1. Launch the Local Edge AI Microservice
+
+Run the local vision engine via Docker (or run locally):
+
+```bash
+docker run -d -p 8000:8000 ghcr.io/cvrvai/animallens:latest
+```
+
+*API runs at `http://localhost:8000` with interactive Swagger docs at `http://localhost:8000/docs`.*
+
+---
+
+### 2. Call the Inference API from Next.js (App Router)
+
+Create an API Route in `app/api/analyze/route.ts`:
+
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(req: NextRequest) {
+  const formData = await req.formData();
+  const file = formData.get("file") as File;
+
+  if (!file) {
+    return NextResponse.json({ error: "No video file provided" }, { status: 400 });
+  }
+
+  // Forward to AnimalLens Edge Vision Service
+  const forwardData = new FormData();
+  forwardData.append("file", file);
+  forwardData.append("species", "dog");
+  forwardData.append("sample_fps", "10.0");
+
+  const response = await fetch("http://localhost:8000/v1/analyze/video", {
+    method: "POST",
+    body: forwardData,
+  });
+
+  const data = await response.json();
+  return NextResponse.json(data);
+}
+```
+
+---
+
+### 3. Display AI Detections & Behavior Telemetry in React
+
+Use standard React components to render the analysis results:
+
+```tsx
+"use client";
+
+import { useState } from "react";
+
+export default function AnimalLensDashboard() {
+  const [loading, setLoading] = useState(false);
+  const [analysis, setAnalysis] = useState<any>(null);
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/analyze", { method: "POST", body: formData });
+    const json = await res.json();
+    setAnalysis(json);
+    setLoading(false);
+  }
+
+  return (
+    <div className="p-8 max-w-4xl mx-auto bg-slate-950 text-white rounded-2xl">
+      <h1 className="text-2xl font-bold mb-4">🐾 AnimalLens Canine Vision AI</h1>
+      <input type="file" accept="video/*" onChange={handleUpload} className="mb-6 block" />
+
+      {loading && <p className="text-cyan-400">Processing video at >60 FPS with BoT-SORT...</p>}
+
+      {analysis && (
+        <div className="space-y-4">
+          <div className="p-4 bg-slate-900 border border-cyan-500/30 rounded-xl">
+            <h2 className="text-lg font-semibold text-cyan-400">Identified Species</h2>
+            <p className="text-xl">{analysis.species} ({analysis.taxonomy_version})</p>
+          </div>
+
+          <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl">
+            <h2 className="text-lg font-semibold mb-2">Behavior Timeline & Kinematics</h2>
+            <div className="space-y-2">
+              {analysis.timeline?.map((entry: any, i: number) => (
+                <div key={i} className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
+                  <span className="text-slate-400 font-mono">[{entry.time}s]</span>
+                  <span className="font-semibold text-emerald-400">{entry.behavior}</span>
+                  <span className="text-xs bg-cyan-950 text-cyan-300 px-2 py-1 rounded">
+                    {(entry.confidence * 100).toFixed(0)}% Conf
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## 📡 Real-Time Live Camera Streaming (WebSockets)
+
+For live security cameras, USB webcams, or pet monitors, connect directly over WebSockets in Next.js:
+
+```typescript
+// useAnimalLensSocket.ts
+import { useEffect, useState } from "react";
+
+export function useAnimalLensSocket() {
+  const [liveEvent, setLiveEvent] = useState<any>(null);
+
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:8000/v1/events");
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "behavior.detected") {
+        setLiveEvent(data.payload);
+      }
+    };
+
+    return () => ws.close();
+  }, []);
+
+  return liveEvent;
+}
+```
+
+---
+
+## 📄 TypeScript Interface Reference
+
+```typescript
+export interface AnimalAnalysisResult {
+  schema_version: string;
+  species: string;
+  duration_seconds: number;
+  total_frames_analyzed: number;
+  timeline: TimelineEntry[];
+  behaviors: BehaviorEvent[];
+}
+
+export interface TimelineEntry {
+  time: number;
+  behavior: string;
+  confidence: number;
+}
+
+export interface BehaviorEvent {
+  event_id: string;
+  timestamp: number;
+  subjects: SubjectTelemetry[];
+  behavior: {
+    category: "locomotion" | "posture" | "social_behavior" | "aggression";
+    label: string;
+    human_readable: string;
+    confidence: number;
+  };
+  temporal: {
+    start: number;
+    end: number;
+    duration: number;
+  };
+}
+
+export interface SubjectTelemetry {
+  track_id: number;
+  display_id: string; // e.g. "DOG-01"
+  velocity_mps: number; // Speed in m/s
+  velocity_kmh: number; // Speed in km/h
+  heading_degrees: number; // 0-360 orientation
+  bbox: {
+    x_min: number;
+    y_min: number;
+    x_max: number;
+    y_max: number;
+  };
+}
+```
+
+---
+
+## 🔬 Supported Canine Behaviors & Kinematics
+
+| Category | Detected Actions | Kinematic Profile |
+| :--- | :--- | :--- |
+| **Locomotion** | `running_gallop`, `trot`, `walk` | Velocity $> 3.5\text{ m/s}$ (Gallop), $1.2-3.5\text{ m/s}$ (Trot), $0.3-1.2\text{ m/s}$ (Walk) |
+| **Posture** | `standing`, `sitting`, `lying_sternal` | Stationary velocity $< 0.3\text{ m/s}$ & aspect ratio posture geometry |
+| **Social Behavior** | `play_bow`, `following`, `greeting` | Inter-Individual Distance ($\text{IID} < 0.6\text{m}$) & reciprocal heading |
+| **Agonistic** | `aggressive_lunge`, `defensive_retreat` | Rapid approach acceleration & defensive spatial separation |
+
+---
+
+## 🐍 Optional: Python Core Engine & Custom Training
+
+If you are a Machine Learning Engineer or Data Scientist who wants to fine-tune custom weights or run direct Python scripts:
+
+### Install Python SDK:
 ```bash
 pip install git+https://github.com/cvrvai/AnimalLens.git
 ```
 
-*Requirements: Python 3.10+, PyTorch, Ultralytics, OpenCV, NumPy, Pydantic.*
-
----
-
-## 🚀 Quickstart
-
-Run behavioral analysis on any dog video in 3 lines of Python:
-
+### Python Script:
 ```python
 from animallens import AnimalLens
 
-# 1. Initialize AnimalLens library
 lens = AnimalLens(species="dog")
-
-# 2. Analyze recorded video (automatically runs YOLOv8 + BoT-SORT Kalman tracking)
-result = lens.analyze("path/to/dog_video.mp4")
-
-# 3. Print human-readable ethogram timeline
+result = lens.analyze("dog_video.mp4")
 print(result.format_timeline_text())
 ```
 
-### Output:
-```text
-00:00:00 Posture.standing (conf: 0.88)
-00:00:01 Locomotion.walk (conf: 0.89)
-00:00:02 Locomotion.running_gallop (conf: 0.96)
-00:00:04 Social_behavior.play_bow (conf: 0.93)
-```
-
----
-
-## 📖 Developer Guide & Python API
-
-### 1. Analyzing Recorded Videos & Extracting Kinematics
-
-```python
-from animallens import AnimalLens
-
-lens = AnimalLens(species="dog")
-result = lens.analyze_video("dog_running.mp4", sample_fps=10.0)
-
-print(f"Total Frames Analyzed: {result.total_frames_analyzed}")
-print(f"Duration: {result.duration_seconds:.2f}s")
-
-# Iterate over structured behavior events
-for event in result.behaviors:
-    print(f"[{event.temporal.start:.1f}s - {event.temporal.end:.1f}s] {event.behavior.label}")
-    print(f"  Category:   {event.behavior.category}")
-    print(f"  Confidence: {event.behavior.confidence:.1%}")
-    print(f"  Track IDs:  {[s.track_id for s in event.subjects]}")
-```
-
----
-
-### 2. Real-Time Camera & RTSP Stream Tracking
-
-Process live 60+ FPS webcam or RTSP camera feeds with zero lag:
-
-```python
-from animallens import AnimalLens
-
-lens = AnimalLens(species="dog")
-
-# Stream live from local USB webcam (0) or RTSP stream URL
-for event in lens.stream(0, target_fps=30.0):
-    print(f"[{event.temporal.start:.2f}s] Active Behavior: {event.behavior.label}")
-```
-
----
-
-### 3. Single Image Detection & Posture Analysis
-
-```python
-from PIL import Image
-from animallens import AnimalLens
-
-lens = AnimalLens(species="dog")
-img = Image.open("dog_photo.jpg")
-
-result = lens.analyze_image(img)
-
-# Access detected bounding boxes and postures
-for event in result.behaviors:
-    for subject in event.subjects:
-        print(f"Dog Track #{subject.track_id}: Bounding Box = {subject.bbox}")
-```
-
----
-
-### 4. Low-Level Tracking & Kinematics Engine
-
-For developers building custom computer vision pipelines, use `AnimalTracker` and `BehavioralClassifier` directly:
-
-```python
-from animallens.tracking.tracker import AnimalTracker
-from animallens.behavior.classifier import BehavioralClassifier
-from animallens.perception.models.yolov8_detector import YOLOv8Detector
-from PIL import Image
-
-detector = YOLOv8Detector()
-tracker = AnimalTracker(species_prefix="DOG", pixel_to_meter_ratio=2.5)
-classifier = BehavioralClassifier()
-
-# 1. Detect bounding boxes
-img = Image.open("frame.jpg")
-detections = detector.detect(img)
-
-# 2. Update Kalman tracker & calculate velocities
-telemetry = tracker.update_frame(detections, timestamp=0.033, dt=0.033)
-
-for subject in telemetry.subjects:
-    print(f"Subject: {subject.display_id}")
-    print(f"  Velocity:      {subject.velocity_mps:.2f} m/s ({subject.velocity_mps * 3.6:.1f} km/h)")
-    print(f"  Heading:       {subject.heading_degrees:.1f}°")
-    print(f"  Acceleration:  {subject.acceleration_mps2:.2f} m/s²")
-
-    # 3. Classify behavior from kinematics
-    behavior = classifier.classify_subject(subject, frame_telemetry=telemetry)
-    print(f"  Behavior:      {behavior.human_readable} (Welfare Score: {behavior.welfare_score}/100)")
-```
-
----
-
-### 5. Multimodal LLM Reasoning with Ollama
-
-Connect Layer B reasoning to any local Ollama model (`gemma3`, `llama3.2`, `qwen2.5`) for biological explanations:
-
-```python
-from animallens import AnimalLens
-
-# Enable Ollama Layer B reasoning
-lens = AnimalLens(species="dog", reasoning="ollama:gemma3")
-lens.analyze_video("dog_training.mp4")
-
-# Ask natural language questions about observed behaviors
-explanation = lens.ask("Did the dog display any stress, fatigue, or lameness during this run?")
-print(explanation)
-```
-
----
-
-### 6. Embedding as a FastAPI Microservice
-
-AnimalLens provides a production-ready FastAPI application:
-
-```python
-# main.py
-from animallens.server.app import app
-
-# Run with: uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
-#### Available Endpoints:
-* `POST /v1/analyze/video`: Multipart video analysis returning structured JSON telemetry.
-* `POST /v1/analyze/image`: Single-frame image detection.
-* `GET /v1/health`: Returns API status and GPU/CUDA device info.
-* `WS /v1/events`: Real-time WebSocket streaming feed.
-
-Or start the server via CLI:
+### Start Server via Python CLI:
 ```bash
-animallens serve --port 8000 --host 0.0.0.0 --device cpu
-```
-
----
-
-## 🔬 Supported Canine Ethogram Categories
-
-| Category | Behaviors / Actions | Kinematic Criteria |
-| :--- | :--- | :--- |
-| **Locomotion** | `running_gallop`, `trot`, `walk` | Velocity $> 3.5\text{ m/s}$ (Gallop), $1.2-3.5\text{ m/s}$ (Trot), $0.3-1.2\text{ m/s}$ (Walk) |
-| **Posture** | `standing`, `sitting`, `lying_sternal`, `sleeping` | Aspect ratio analysis & stationary velocity $< 0.3\text{ m/s}$ |
-| **Social Behavior** | `play_bow`, `following`, `sniffing_conspecific`, `greeting` | Inter-Individual Distance ($\text{IID} < 0.6\text{m}$) & posture alignment |
-| **Agonistic / Defense** | `aggressive_lunge`, `defensive_retreat`, `growling_stance` | High negative approach rate & rapid acceleration spikes |
-
----
-
-## 🏛️ System Architecture
-
-```text
-                                +-------------------------------------------+
-                                |               AnimalLens SDK              |
-                                |     from animallens import AnimalLens     |
-                                +-------------------------------------------+
-                                                      |
-                                                      v
-                                        +----------------------------+
-                                        |    AnimalLens Core Engine  |
-                                        +----------------------------+
-                                                      |
-                       +------------------------------+------------------------------+
-                       |                                                             |
-                       v                                                             v
-        +-----------------------------+                               +-----------------------------+
-        |  Layer A: Vision Perception |                               |  Layer B: Reasoning (Opt)   |
-        |  (100% LLM-Independent)     |                               |  (Ollama / Local LLM)       |
-        +-----------------------------+                               +-----------------------------+
-        |  1. YOLOv8 Object Detection |                               |  * Ollama Client (gemma3,   |
-        |  2. BoT-SORT Kalman MOT     |                               |    llama3.2, qwen2.5)       |
-        |  3. Kinematics Engine       |                               |  * Biological Summaries     |
-        |  4. Ethogram Classification |                               |  * Veterinary Q&A           |
-        +-----------------------------+                               +-----------------------------+
-                       |                                                             ^
-                       v                                                             |
-        +-----------------------------+                                              |
-        |     BehaviorEvent JSON      |----------------------------------------------+
-        | (Standard Pydantic Schema)  |
-        +-----------------------------+
-```
-
----
-
-## 📄 Standard Output Schema
-
-Every analyzed event produces a typed Pydantic JSON structure:
-
-```json
-{
-  "schema_version": "1.0",
-  "event_id": "evt_8a92f1b0",
-  "timestamp": 1787474800.0,
-  "species": {
-    "id": "canis_lupus_familiaris",
-    "name": "Domestic Dog",
-    "scientific_name": "Canis lupus familiaris"
-  },
-  "subjects": [
-    {
-      "track_id": 1,
-      "display_id": "DOG-01",
-      "velocity_mps": 14.0,
-      "velocity_kmh": 50.4,
-      "heading_degrees": 84.5,
-      "bbox": {
-        "x_min": 0.35,
-        "y_min": 0.42,
-        "x_max": 0.58,
-        "y_max": 0.76
-      }
-    }
-  ],
-  "behavior": {
-    "category": "locomotion",
-    "label": "running_gallop",
-    "human_readable": "High-Speed Gallop Sprint",
-    "confidence": 0.96
-  },
-  "temporal": {
-    "start": 2.4,
-    "end": 8.1,
-    "duration": 5.7
-  }
-}
+animallens serve --port 8000 --device cpu
 ```
 
 ---
 
 ## 🤝 Contributing & License
 
-Contributions, bug reports, and new species adapters are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions for new React components, Next.js templates, and species adapters are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Licensed under the **Apache License, Version 2.0**.

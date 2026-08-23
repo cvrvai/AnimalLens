@@ -282,3 +282,46 @@ async def verify_uncertainty_endpoint(
         raise HTTPException(status_code=400, detail="Failed to verify uncertainty item.")
     return {"status": "verified", "unc_id": unc_id, "verified_label": req.verified_label}
 
+
+# ---------------------------------------------------------------------------
+# Live RTSP Camera Streaming & Monitoring Endpoints
+# ---------------------------------------------------------------------------
+
+class StartStreamRequest(BaseModel):
+    camera_id: str
+    rtsp_url: str
+    species: str = "redclaw"
+    save_to_db: bool = True
+    target_fps: float = 15.0
+
+
+@router.post("/stream/start")
+async def start_camera_stream(req: StartStreamRequest) -> Dict[str, Any]:
+    """Start background real-time RTSP stream analysis and broadcasting worker."""
+    from animallens.server.stream_manager import live_stream_manager
+    return live_stream_manager.start_stream(
+        camera_id=req.camera_id,
+        rtsp_url=req.rtsp_url,
+        species=req.species,
+        save_to_db=req.save_to_db,
+        target_fps=req.target_fps,
+    )
+
+
+@router.post("/stream/stop/{camera_id}")
+async def stop_camera_stream(camera_id: str) -> Dict[str, Any]:
+    """Stop background RTSP camera stream worker."""
+    from animallens.server.stream_manager import live_stream_manager
+    success = live_stream_manager.stop_stream(camera_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"No active stream found for camera '{camera_id}'")
+    return {"status": "stopped", "camera_id": camera_id}
+
+
+@router.get("/stream/active")
+async def list_active_streams() -> Dict[str, Any]:
+    """List all currently active camera streams and their real-time latency metrics."""
+    from animallens.server.stream_manager import live_stream_manager
+    return live_stream_manager.list_streams()
+
+

@@ -1,94 +1,213 @@
 <div align="center">
 
-# AnimalLens
-### Open Animal Behavior Intelligence Platform
+# 🐕 AnimalLens
+### Open-Source Canine Behavior & Ethology Intelligence Library
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg)](https://pytorch.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg)](https://fastapi.tiangolo.com)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
+[![OpenCV](https://img.shields.io/badge/OpenCV-4.8+-5C3EE8.svg)](https://opencv.org/)
 
-**AnimalLens** is an open-source animal behavior intelligence platform for images, recorded video, and real-time camera streams, with edge computer vision (YOLOv8 + BoT-SORT tracking + Kinematics) and optional local LLM reasoning through Ollama.
+**AnimalLens** is an open-source Python library for real-time animal computer vision, multi-object tracking, kinematics analysis, and ethological behavior classification.
 
-> **AnimalLens supports pluggable multi-species ethology. Built-in adapters include Redclaw Crayfish (*Cherax quadricarinatus*) for smart aquaculture and Domestic Dog (*Canis lupus familiaris*) for canine posture, locomotion, and welfare tracking.**
+Built for veterinary researchers, smart animal shelters, and AI developers. Features out-of-the-box **Domestic Dog (*Canis lupus familiaris*)** posture, locomotion, and welfare tracking.
 
 </div>
 
 ---
 
-## ⚡ 30-Second Quickstart (Copy & Run)
+## 📦 Installation
 
-Get running immediately with zero configuration. Choose your preferred workflow:
-
-### Option A: 💻 Command Line (Zero Python Code)
+Install directly from GitHub via `pip`:
 
 ```bash
-# 1. Install AnimalLens
 pip install git+https://github.com/cvrvai/AnimalLens.git
-
-# 2. Run instant video analysis (automatic model download & BoT-SORT tracking)
-animallens analyze path/to/my_video.mp4 --species dog --format timeline
 ```
+
+*Requirements: Python 3.10+, PyTorch, Ultralytics, OpenCV, NumPy, Pydantic.*
 
 ---
 
-### Option B: 🐍 Python SDK (3-Line Integration)
+## 🚀 Quickstart
+
+Run behavioral analysis on any dog video in 3 lines of Python:
 
 ```python
 from animallens import AnimalLens
 
-# 1. Initialize for any species (dog, redclaw, etc.)
+# 1. Initialize AnimalLens library
 lens = AnimalLens(species="dog")
 
-# 2. Analyze video or image
-result = lens.analyze("dog_video.mp4")
+# 2. Analyze recorded video (automatically runs YOLOv8 + BoT-SORT Kalman tracking)
+result = lens.analyze("path/to/dog_video.mp4")
 
 # 3. Print human-readable ethogram timeline
 print(result.format_timeline_text())
 ```
 
----
-
-### Option C: 🐳 Docker 1-Liner (Instant REST & WebSocket Microservice)
-
-```bash
-# Run local API server on port 8000 (OpenAPI UI at http://localhost:8000/docs)
-docker run -p 8000:8000 ghcr.io/cvrvai/animallens:latest
+### Output:
+```text
+00:00:00 Posture.standing (conf: 0.88)
+00:00:01 Locomotion.walk (conf: 0.89)
+00:00:02 Locomotion.running_gallop (conf: 0.96)
+00:00:04 Social_behavior.play_bow (conf: 0.93)
 ```
 
 ---
 
-### Option D: 📹 Live Camera & RTSP Stream
+## 📖 Developer Guide & Python API
+
+### 1. Analyzing Recorded Videos & Extracting Kinematics
+
+```python
+from animallens import AnimalLens
+
+lens = AnimalLens(species="dog")
+result = lens.analyze_video("dog_running.mp4", sample_fps=10.0)
+
+print(f"Total Frames Analyzed: {result.total_frames_analyzed}")
+print(f"Duration: {result.duration_seconds:.2f}s")
+
+# Iterate over structured behavior events
+for event in result.behaviors:
+    print(f"[{event.temporal.start:.1f}s - {event.temporal.end:.1f}s] {event.behavior.label}")
+    print(f"  Category:   {event.behavior.category}")
+    print(f"  Confidence: {event.behavior.confidence:.1%}")
+    print(f"  Track IDs:  {[s.track_id for s in event.subjects]}")
+```
+
+---
+
+### 2. Real-Time Camera & RTSP Stream Tracking
+
+Process live 60+ FPS webcam or RTSP camera feeds with zero lag:
 
 ```python
 from animallens import AnimalLens
 
 lens = AnimalLens(species="dog")
 
-# Stream live behavior events directly from webcam (0) or RTSP camera
-for event in lens.stream(0):
-    print(f"[{event.temporal.start:.1f}s] {event.behavior.category}.{event.behavior.label} (Conf: {event.behavior.confidence:.1%})")
+# Stream live from local USB webcam (0) or RTSP stream URL
+for event in lens.stream(0, target_fps=30.0):
+    print(f"[{event.temporal.start:.2f}s] Active Behavior: {event.behavior.label}")
 ```
 
 ---
 
-## System Architecture
+### 3. Single Image Detection & Posture Analysis
 
-AnimalLens strictly separates **Layer A (Vision & Temporal Intelligence)** from **Layer B (Optional LLM Reasoning)**.
+```python
+from PIL import Image
+from animallens import AnimalLens
+
+lens = AnimalLens(species="dog")
+img = Image.open("dog_photo.jpg")
+
+result = lens.analyze_image(img)
+
+# Access detected bounding boxes and postures
+for event in result.behaviors:
+    for subject in event.subjects:
+        print(f"Dog Track #{subject.track_id}: Bounding Box = {subject.bbox}")
+```
+
+---
+
+### 4. Low-Level Tracking & Kinematics Engine
+
+For developers building custom computer vision pipelines, use `AnimalTracker` and `BehavioralClassifier` directly:
+
+```python
+from animallens.tracking.tracker import AnimalTracker
+from animallens.behavior.classifier import BehavioralClassifier
+from animallens.perception.models.yolov8_detector import YOLOv8Detector
+from PIL import Image
+
+detector = YOLOv8Detector()
+tracker = AnimalTracker(species_prefix="DOG", pixel_to_meter_ratio=2.5)
+classifier = BehavioralClassifier()
+
+# 1. Detect bounding boxes
+img = Image.open("frame.jpg")
+detections = detector.detect(img)
+
+# 2. Update Kalman tracker & calculate velocities
+telemetry = tracker.update_frame(detections, timestamp=0.033, dt=0.033)
+
+for subject in telemetry.subjects:
+    print(f"Subject: {subject.display_id}")
+    print(f"  Velocity:      {subject.velocity_mps:.2f} m/s ({subject.velocity_mps * 3.6:.1f} km/h)")
+    print(f"  Heading:       {subject.heading_degrees:.1f}°")
+    print(f"  Acceleration:  {subject.acceleration_mps2:.2f} m/s²")
+
+    # 3. Classify behavior from kinematics
+    behavior = classifier.classify_subject(subject, frame_telemetry=telemetry)
+    print(f"  Behavior:      {behavior.human_readable} (Welfare Score: {behavior.welfare_score}/100)")
+```
+
+---
+
+### 5. Multimodal LLM Reasoning with Ollama
+
+Connect Layer B reasoning to any local Ollama model (`gemma3`, `llama3.2`, `qwen2.5`) for biological explanations:
+
+```python
+from animallens import AnimalLens
+
+# Enable Ollama Layer B reasoning
+lens = AnimalLens(species="dog", reasoning="ollama:gemma3")
+lens.analyze_video("dog_training.mp4")
+
+# Ask natural language questions about observed behaviors
+explanation = lens.ask("Did the dog display any stress, fatigue, or lameness during this run?")
+print(explanation)
+```
+
+---
+
+### 6. Embedding as a FastAPI Microservice
+
+AnimalLens provides a production-ready FastAPI application:
+
+```python
+# main.py
+from animallens.server.app import app
+
+# Run with: uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+#### Available Endpoints:
+* `POST /v1/analyze/video`: Multipart video analysis returning structured JSON telemetry.
+* `POST /v1/analyze/image`: Single-frame image detection.
+* `GET /v1/health`: Returns API status and GPU/CUDA device info.
+* `WS /v1/events`: Real-time WebSocket streaming feed.
+
+Or start the server via CLI:
+```bash
+animallens serve --port 8000 --host 0.0.0.0 --device cpu
+```
+
+---
+
+## 🔬 Supported Canine Ethogram Categories
+
+| Category | Behaviors / Actions | Kinematic Criteria |
+| :--- | :--- | :--- |
+| **Locomotion** | `running_gallop`, `trot`, `walk` | Velocity $> 3.5\text{ m/s}$ (Gallop), $1.2-3.5\text{ m/s}$ (Trot), $0.3-1.2\text{ m/s}$ (Walk) |
+| **Posture** | `standing`, `sitting`, `lying_sternal`, `sleeping` | Aspect ratio analysis & stationary velocity $< 0.3\text{ m/s}$ |
+| **Social Behavior** | `play_bow`, `following`, `sniffing_conspecific`, `greeting` | Inter-Individual Distance ($\text{IID} < 0.6\text{m}$) & posture alignment |
+| **Agonistic / Defense** | `aggressive_lunge`, `defensive_retreat`, `growling_stance` | High negative approach rate & rapid acceleration spikes |
+
+---
+
+## 🏛️ System Architecture
 
 ```text
                                 +-------------------------------------------+
                                 |               AnimalLens SDK              |
                                 |     from animallens import AnimalLens     |
                                 +-------------------------------------------+
-                                                      |
-                  +-----------------------------------+-----------------------------------+
-                  |                                   |                                   |
-           [ Python SDK ]                      [ CLI (Typer) ]                     [ REST & WS API ]
-        ai = AnimalLens(...)                animallens analyze ...                 POST /v1/analyze
-        ai.analyze_video(...)                animallens serve ...                   WS /v1/events
-                  |                                   |                                   |
-                  +-----------------------------------+-----------------------------------+
                                                       |
                                                       v
                                         +----------------------------+
@@ -100,16 +219,14 @@ AnimalLens strictly separates **Layer A (Vision & Temporal Intelligence)** from 
                        v                                                             v
         +-----------------------------+                               +-----------------------------+
         |  Layer A: Vision Perception |                               |  Layer B: Reasoning (Opt)   |
-        |  (100% LLM-Independent)     |                               |  (Ollama / Any Model)       |
+        |  (100% LLM-Independent)     |                               |  (Ollama / Local LLM)       |
         +-----------------------------+                               +-----------------------------+
-        |  1. Source Ingestion        |                               |  * Ollama Client (gemma3,   |
-        |     (Image/Video/RTSP)      |                               |    qwen, llama, etc.)       |
-        |  2. Object Detection        |                               |  * Text & Vision Routing    |
-        |  3. Multi-Object Tracking   |                               |  * Explanations & Summaries |
-        |  4. Pose / Movement Engine  |                               |  * Biological Insights      |
-        |  5. Temporal Classification |                               +-----------------------------+
-        +-----------------------------+                                              ^
-                       |                                                             |
+        |  1. YOLOv8 Object Detection |                               |  * Ollama Client (gemma3,   |
+        |  2. BoT-SORT Kalman MOT     |                               |    llama3.2, qwen2.5)       |
+        |  3. Kinematics Engine       |                               |  * Biological Summaries     |
+        |  4. Ethogram Classification |                               |  * Veterinary Q&A           |
+        +-----------------------------+                               +-----------------------------+
+                       |                                                             ^
                        v                                                             |
         +-----------------------------+                                              |
         |     BehaviorEvent JSON      |----------------------------------------------+
@@ -117,250 +234,55 @@ AnimalLens strictly separates **Layer A (Vision & Temporal Intelligence)** from 
         +-----------------------------+
 ```
 
-### Core Principles
-1. **Layer A Works 100% Offline without LLMs**: Fast computer vision models detect animals, track persistent IDs, and classify temporal behaviors into structured JSON.
-2. **Layer B Connects to Any Ollama Model**: Send structured behavior events to any local or remote Ollama model (`gemma3`, `qwen2.5`, `llama3.2`, `mistral`, etc.) for natural language summaries, ethological explanations, and recommendations.
-3. **Pluggable Species Adapters**: Species-specific taxonomy and feature extraction live in decoupled adapters (`species/redclaw`, `species/pig`). Adding a new species never requires modifying the core engine.
-4. **Never Force False Positives**: Ambiguous or low-confidence interactions are tagged as `unknown` with uncertainty flags for active learning and expert human review.
-
 ---
 
-## Usage Examples
+## 📄 Standard Output Schema
 
-### 1. Single Image Analysis
-
-```python
-from animallens import AnimalLens
-
-lens = AnimalLens(species="redclaw", reasoning=None)
-result = lens.analyze_image("specimen.jpg")
-
-for event in result.behaviors:
-    print(f"[{event.behavior.category}] {event.behavior.label} (Conf: {event.behavior.confidence:.2f})")
-    print(f"Tracked Subjects: {len(event.subjects)}")
-```
-
-### 2. Recorded Video & Timeline Generation
-
-```python
-from animallens import AnimalLens
-
-lens = AnimalLens(species="redclaw", reasoning="ollama:gemma3")
-result = lens.analyze_video("tank_recording.mp4", sample_fps=5.0)
-
-print(result.format_timeline_text())
-
-# Access structured Pydantic schema
-if result.behaviors:
-    first_event = result.behaviors[0]
-    print(first_event.model_dump_json(indent=2))
-```
-
-### 3. Real-Time RTSP Stream & Webcams
-
-```python
-from animallens import AnimalLens
-
-lens = AnimalLens(species="redclaw")
-
-# Connect to live camera or USB index (0)
-for event in lens.stream("rtsp://admin:pass@192.168.1.100:554/live"):
-    print(f"[{event.temporal.start:05.1f}s] Detected: {event.behavior.category}.{event.behavior.label}")
-```
-
-### 4. Conversational Behavior Q&A
-
-```python
-from animallens import AnimalLens
-
-lens = AnimalLens(species="redclaw", reasoning="ollama:gemma3")
-lens.analyze_video("tank.mp4")
-
-answer = lens.ask("Were there any aggressive encounters or signs of stress during this session?")
-print(answer)
-```
-
----
-
-## Standard Behavior Event Schema
-
-Every detected behavior produces a strongly-typed schema:
+Every analyzed event produces a typed Pydantic JSON structure:
 
 ```json
 {
   "schema_version": "1.0",
-  "event_id": "evt_01928",
-  "timestamp": 1724400000.0,
+  "event_id": "evt_8a92f1b0",
+  "timestamp": 1787474800.0,
   "species": {
-    "id": "cherax_quadricarinatus",
-    "name": "Redclaw Crayfish",
-    "scientific_name": "Cherax quadricarinatus",
-    "taxonomy_version": "1.0.0"
-  },
-  "source": {
-    "type": "camera",
-    "camera_id": "CAM-001"
+    "id": "canis_lupus_familiaris",
+    "name": "Domestic Dog",
+    "scientific_name": "Canis lupus familiaris"
   },
   "subjects": [
     {
-      "track_id": 17,
-      "animal_id": "F-003",
-      "velocity": 0.04
-    },
-    {
-      "track_id": 23,
-      "animal_id": "M-002",
-      "velocity": 0.05
+      "track_id": 1,
+      "display_id": "DOG-01",
+      "velocity_mps": 14.0,
+      "velocity_kmh": 50.4,
+      "heading_degrees": 84.5,
+      "bbox": {
+        "x_min": 0.35,
+        "y_min": 0.42,
+        "x_max": 0.58,
+        "y_max": 0.76
+      }
     }
   ],
   "behavior": {
-    "category": "reproduction",
-    "label": "mating",
-    "confidence": 0.93,
-    "is_uncertain": false
+    "category": "locomotion",
+    "label": "running_gallop",
+    "human_readable": "High-Speed Gallop Sprint",
+    "confidence": 0.96
   },
   "temporal": {
-    "start": 42.1,
-    "end": 74.4,
-    "duration": 32.3
-  },
-  "model": {
-    "species_model": "redclaw-behavior-v1",
-    "version": "1.0.0",
-    "detector": "yolov8-redclaw-v1",
-    "classifier": "redclaw-temporal-v1"
-  },
-  "reasoning": {
-    "provider": "ollama:gemma3",
-    "model": "gemma3",
-    "summary": "Observed copulatory interaction between two mature Cherax quadricarinatus.",
-    "recommendations": [
-      "Maintain stable water temperature at 26-28C",
-      "Ensure sufficient shelter tiles to prevent post-copulatory aggression"
-    ]
+    "start": 2.4,
+    "end": 8.1,
+    "duration": 5.7
   }
 }
 ```
 
 ---
 
-## CLI Reference
+## 🤝 Contributing & License
 
-AnimalLens includes a full-featured CLI:
-
-```bash
-# Run system diagnostics (Python, GPU, CUDA, OpenCV, FFmpeg, Ollama)
-animallens doctor
-
-# List registered species
-animallens species list
-
-# List & manage species behavior models
-animallens models
-animallens pull redclaw-behavior-v1
-animallens remove redclaw-behavior-v1
-
-# Discover installed Ollama LLMs
-animallens ollama list
-
-# Analyze media files
-animallens analyze specimen.jpg --species redclaw
-animallens analyze tank.mp4 --species redclaw --reasoning "ollama:gemma3" --format timeline
-
-# Start REST & WebSocket server
-animallens serve --host 0.0.0.0 --port 8088
-```
-
----
-
-## REST & WebSocket API
-
-Start the server:
-```bash
-animallens serve
-```
-
-Interactive OpenAPI documentation is available at `http://localhost:8088/docs`.
-
-### API Endpoints
-| Method | Path | Description |
-| :--- | :--- | :--- |
-| `GET` | `/v1/health` | Service health status |
-| `GET` | `/v1/species` | List supported species & taxonomies |
-| `GET` | `/v1/models` | List installed and catalog models |
-| `POST`| `/v1/models/pull` | Download model weights to cache |
-| `GET` | `/v1/ollama/models` | List local Ollama models |
-| `POST`| `/v1/analyze/image` | Multipart image analysis |
-| `POST`| `/v1/analyze/video` | Multipart video analysis & timeline |
-| `WS`  | `/v1/events` | Real-time WebSocket behavior feed |
-| `GET` | `/v1/events/sse` | Server-Sent Events behavior stream |
-
----
-
-## Docker Deployment
-
-Run with Docker Compose:
-
-```bash
-docker compose up -d
-```
-
-The API will be available at `http://localhost:8088`.
-
----
-
-## Extending AnimalLens (Adding a New Species)
-
-Adding a new species (e.g. `pig`, `chicken`, `fish`) requires **zero changes** to AnimalLens Core. Simply create a new folder under `animallens/species/<species_id>/`:
-
-```text
-animallens/species/pig/
-├── __init__.py
-├── config.yaml
-├── taxonomy.yaml
-└── adapter.py
-```
-
-Then register it:
-```python
-from animallens.species.registry import species_registry
-from animallens.species.pig.adapter import PigAdapter
-
-species_registry.register_adapter("pig", PigAdapter())
-```
-
----
-
-## Documentation Index
-
-Detailed technical, mathematical, and execution documentation is available in the [`docs/`](docs/) directory:
-
-1. [Mathematical Foundations & Operations Research](docs/01_mathematical_foundations.md): Multi-agent spatial graphs, Markov state transitions, and Pareto buffer optimization.
-2. [Scientific Research Methodology](docs/02_scientific_research_methodology.md): Quantitative ethology sampling protocols (*Altmann 1974*), anti-leakage grouped partitioning, and Cohen's Kappa.
-3. [System Architecture](docs/03_system_architecture.md): Modular Layer A vision perception and Layer B reasoning provider interfaces.
-4. [Developer Guide & API Reference](docs/04_developer_guide.md): Python SDK, REST & WebSocket API, and custom species tutorial.
-5. [AI SDLC & Project Execution Playbook](docs/05_sdlc_and_execution_playbook.md): 7-Stage ML-SDLC framework, 12-week timeline, and founder task checklist.
-6. [Deep Learning & MongoDB Architecture](docs/06_ml_dl_and_mongodb_architecture.md): YOLOv8, BoT-SORT, temporal loss functions, and MongoDB time-series collections.
-7. [Agile Scrum Board & Sprint Delivery Hub](docs/07_agile_scrum_board.md): Sprint task breakdown and user stories.
-8. [AI Agent Governance & Evidence Protocol](docs/08_ai_agent_notion_governance_protocol.md): Notion-first planning hooks, verification requirements, and evidence audit trails.
-
----
-
-## Roadmap & Release Milestones
- 
-- [x] **v0.1 — Phase 1**: Core platform architecture, Layer A/B decoupling, Redclaw species adapter, Developer Python SDK, Typer CLI (`doctor`, `models`, `analyze`), FastAPI REST/WS server, and rolling video buffer.
-- [x] **v0.2 — Phase 2**: Deep Learning Perception Engine (YOLOv8 Object Detector + BoT-SORT Kalman 8D Multi-Animal Tracker).
-- [x] **v0.3 — Phase 3**: Anti-leakage session partitioner (`animallens dataset split`) & Inter-rater Cohen's Kappa reliability validator.
-- [x] **v0.4 — Phase 4**: Temporal Action Segmentation & Kinematics Engine (velocity vectors, IID approach rate, swarm polarization, and hysteresis smoothing).
-- [x] **v0.5 — Phase 5**: Edge RTSP Streaming & Low-Latency Buffer Engine (<60ms latency, automatic reconnection).
-- [x] **v0.6 — Phase 6**: Layer B Ollama Multimodal Reasoning & Automated Uncertainty Triage Active Learning Loop.
-- [x] **v0.7 — Phase 7**: Multi-Species Expansion (Domestic Dog *Canis lupus familiaris*) & Hugging Face Hub Model Distribution.
-- [ ] **v1.0**: Production Multi-Camera Edge Cluster & Hardware Acceleration (TensorRT / OpenVINO).
-
----
-
-## Contributing & License
-
-Contributions are welcome! Please check [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions.
+Contributions, bug reports, and new species adapters are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Licensed under the **Apache License, Version 2.0**.

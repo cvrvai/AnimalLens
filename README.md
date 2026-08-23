@@ -304,6 +304,18 @@ species_registry.register_adapter("pig", PigAdapter())
 
 ---
 
+## Documentation Index
+
+Detailed technical, mathematical, and execution documentation is available in the [`docs/`](docs/) directory:
+
+1. [Mathematical Foundations & Operations Research](docs/01_mathematical_foundations.md): Multi-agent spatial graphs, Markov state transitions, and Pareto buffer optimization.
+2. [Scientific Research Methodology](docs/02_scientific_research_methodology.md): Quantitative ethology sampling protocols (*Altmann 1974*), anti-leakage grouped partitioning, and Cohen's Kappa.
+3. [System Architecture](docs/03_system_architecture.md): Modular Layer A vision perception and Layer B reasoning provider interfaces.
+4. [Developer Guide & API Reference](docs/04_developer_guide.md): Python SDK, REST & WebSocket API, and custom species tutorial.
+5. [AI SDLC & Project Execution Playbook](docs/05_sdlc_and_execution_playbook.md): 7-Stage ML-SDLC framework, 12-week timeline, and founder task checklist.
+
+---
+
 ## Roadmap & Release Milestones
 
 - [x] **v0.1 — Phase 1** (Current): Platform architecture, Layer A/B decoupling, Redclaw species adapter, Developer Python SDK, Typer CLI (`doctor`, `models`, `analyze`), FastAPI REST/WS server, and rolling video buffer.

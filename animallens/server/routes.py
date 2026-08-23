@@ -133,7 +133,7 @@ async def list_ollama_models() -> Dict[str, Any]:
 
 @router.post("/analyze/image", response_model=AnalysisResult)
 async def analyze_image_endpoint(
-    species: str = Form("redclaw"),
+    species: str = Form("dog"),
     reasoning: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
 ) -> AnalysisResult:
@@ -164,7 +164,7 @@ async def analyze_image_endpoint(
 
 @router.post("/analyze/video", response_model=AnalysisResult)
 async def analyze_video_endpoint(
-    species: str = Form("redclaw"),
+    species: str = Form("dog"),
     reasoning: Optional[str] = Form(None),
     sample_fps: float = Form(5.0),
     max_duration_seconds: Optional[float] = Form(None),

@@ -71,27 +71,21 @@ class AnimalLens:
             base_url=ollama_base_url,
         )
 
-        # Resolve detector
+        # Resolve detector: Always default to real YOLOv8Detector
         resolved_detector = detector
         if isinstance(detector, str):
-            if detector.lower() in ("yolo", "yolov8", "yolov8n", "yolov8s"):
-                from animallens.perception.models.yolov8_detector import YOLOv8Detector
-                resolved_detector = YOLOv8Detector()
+            from animallens.perception.models.yolov8_detector import YOLOv8Detector
+            resolved_detector = YOLOv8Detector(classes=getattr(self.species_adapter.config, "classes", None))
         elif resolved_detector is None:
-            import os
-            trained_weights = Path("data/trained_models/redclaw-behavior-v1.pt")
-            cache_weights = Path(os.path.expanduser("~/.cache/animallens/models/redclaw-behavior-v1/redclaw-behavior-v1.pt"))
-            weights_path = trained_weights if trained_weights.exists() else (cache_weights if cache_weights.exists() else None)
-            if weights_path and weights_path.exists():
-                from animallens.perception.models.yolov8_detector import YOLOv8Detector
-                resolved_detector = YOLOv8Detector(model_path=weights_path)
+            from animallens.perception.models.yolov8_detector import YOLOv8Detector
+            species_classes = getattr(self.species_adapter.config, "classes", None)
+            resolved_detector = YOLOv8Detector(classes=species_classes)
 
-        # Resolve tracker
+        # Resolve tracker: Always default to real BoTSORTTracker
         resolved_tracker = tracker
         if isinstance(tracker, str):
-            if tracker.lower() in ("botsort", "bot_sort", "bytetrack", "kalman"):
-                from animallens.perception.models.botsort_tracker import BoTSORTTracker
-                resolved_tracker = BoTSORTTracker()
+            from animallens.perception.models.botsort_tracker import BoTSORTTracker
+            resolved_tracker = BoTSORTTracker()
         elif resolved_tracker is None:
             from animallens.perception.models.botsort_tracker import BoTSORTTracker
             resolved_tracker = BoTSORTTracker()

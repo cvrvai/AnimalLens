@@ -3,7 +3,11 @@ name: Domestic Dog
 scientific_name: Canis lupus familiaris
 taxonomy_version: 1.0.0
 default_model: yolov8n.pt
-detection_threshold: 0.40
+detection_threshold: 0.35
 min_track_length: 3
 uncertainty_threshold: 0.50
+classes:
+  - dog
+  - canine
+  - canis_lupus_familiaris
 description: Domain adapter for canine posture, locomotion, play, and aggression ethology.

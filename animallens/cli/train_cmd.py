@@ -16,28 +16,36 @@ console = Console()
 def train_model_cli(
     video: Optional[Path] = typer.Option(None, "--video", "-v", help="Path to raw video clip for auto-dataset extraction"),
     dataset: Optional[Path] = typer.Option(None, "--dataset", "-d", help="Path to existing dataset.yaml config"),
+    species: str = typer.Option("dog", "--species", "-s", help="Target species ('dog', 'pig', 'redclaw')"),
     base_model: str = typer.Option("yolov8s.pt", "--base-model", "-m", help="Base starting weights"),
     epochs: int = typer.Option(50, "--epochs", "-e", help="Training epoch count"),
     batch: int = typer.Option(16, "--batch", "-b", help="Batch size"),
     imgsz: int = typer.Option(640, "--imgsz", help="Image resolution"),
     device: str = typer.Option("cpu", "--device", help="Training device (cpu, 0, mps)"),
     output_dir: Path = typer.Option(Path("models/trained"), "--output", "-o", help="Project output directory"),
-    name: str = typer.Option("custom_canine_v1", "--name", "-n", help="Experiment name"),
+    name: Optional[str] = typer.Option(None, "--name", "-n", help="Experiment name"),
     resume: bool = typer.Option(False, "--resume", "-r", help="Resume from last checkpoint"),
 ) -> None:
     """
     Train or fine-tune custom YOLOv8 perception models directly from video or dataset.
     """
+    from animallens.species.registry import species_registry
     from animallens.training.dataset_builder import VideoDatasetBuilder
     from animallens.training.trainer import ModelTrainer
 
+    adapter = species_registry.get(species)
+    target_classes = getattr(adapter.config, "classes", [species])
+    exp_name = name or f"custom_{species}_v1"
+
     console.print(Panel(
         f"[bold cyan]AnimalLens 1-Click Deep Learning Model Trainer[/bold cyan]\n\n"
+        f"  * Target Species:   [green]{adapter.config.name} ({species})[/green]\n"
+        f"  * Target Classes:   [green]{', '.join(target_classes)}[/green]\n"
         f"  * Base Model:       [green]{base_model}[/green]\n"
         f"  * Epochs:           [green]{epochs}[/green]\n"
         f"  * Batch Size:       [green]{batch}[/green]\n"
         f"  * Device:           [green]{device}[/green]\n"
-        f"  * Project Output:   [green]{output_dir / name}[/green]",
+        f"  * Project Output:   [green]{output_dir / exp_name}[/green]",
         title="Training Configuration",
         border_style="cyan",
     ))
@@ -52,9 +60,9 @@ def train_model_cli(
         console.print(f"\n[cyan]Extracting training keyframes from:[/cyan] {video.name}...")
         builder = VideoDatasetBuilder(output_dir=output_dir / "dataset")
         frames = builder.extract_keyframes(video, sample_fps=2.0)
-        console.print(f"[green]Extracted {len(frames)} frames.[/green] Generating initial pseudo-labels...")
-        builder.generate_pseudo_labels()
-        dataset_yaml = builder.write_yaml_config(classes=["dog"])
+        console.print(f"[green]Extracted {len(frames)} frames.[/green] Generating initial pseudo-labels for {adapter.config.name}...")
+        builder.generate_pseudo_labels(classes=target_classes)
+        dataset_yaml = builder.write_yaml_config(species_name=species, classes=target_classes)
 
     if not dataset_yaml or not dataset_yaml.exists():
         console.print("[bold red]Error:[/bold red] Please provide either --video or --dataset with a valid dataset.yaml.")

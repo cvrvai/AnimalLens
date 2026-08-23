@@ -8,6 +8,7 @@ from typing import Dict, List, Type
 from animallens.core.exceptions import SpeciesNotFoundError
 from animallens.species.base import SpeciesAdapter
 from animallens.species.dog.adapter import DogAdapter
+from animallens.species.pig.adapter import PigAdapter
 from animallens.species.redclaw.adapter import RedclawAdapter
 
 
@@ -32,6 +33,14 @@ class SpeciesRegistry:
         self.register_adapter("canis_lupus_familiaris", dog)
         self.register_alias("dog", "canis_lupus_familiaris")
         self.register_alias("canine", "canis_lupus_familiaris")
+
+        pig = PigAdapter()
+        self.register_adapter("sus_scrofa_domesticus", pig)
+        self.register_alias("pig", "sus_scrofa_domesticus")
+        self.register_alias("swine", "sus_scrofa_domesticus")
+        self.register_alias("hog", "sus_scrofa_domesticus")
+        self.register_alias("sow", "sus_scrofa_domesticus")
+        self.register_alias("piglet", "sus_scrofa_domesticus")
 
     def register_adapter(self, species_id: str, adapter: SpeciesAdapter) -> None:
         """Register an instantiated SpeciesAdapter."""

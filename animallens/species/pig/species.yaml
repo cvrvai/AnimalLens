@@ -1,0 +1,16 @@
+id: sus_scrofa_domesticus
+name: Domestic Pig
+scientific_name: Sus scrofa domesticus
+taxonomy_version: 1.0.0
+default_model: pig-posture-v1.pt
+detection_threshold: 0.35
+min_track_length: 3
+uncertainty_threshold: 0.50
+classes:
+  - pig
+  - swine
+  - hog
+  - sow
+  - piglet
+  - sus_scrofa_domesticus
+description: Domain adapter for swine commercial welfare, recumbency posture, thermal huddling, and tail-biting aggression.

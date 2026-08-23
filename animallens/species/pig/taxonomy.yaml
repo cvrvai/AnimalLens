@@ -1,0 +1,40 @@
+version: 1.0.0
+species: sus_scrofa_domesticus
+categories:
+  posture:
+    description: Stationary postures and clinical resting recumbency
+    labels:
+      - standing
+      - sternal_recumbency
+      - lateral_recumbency
+      - sitting_dog_sitting
+      - huddling_cold_stress
+      - panting_heat_stress
+  locomotion:
+    description: Spatial movement and exploratory locomotion
+    labels:
+      - walking
+      - running_gallop
+      - trotting
+      - rooting_exploration
+  feeding:
+    description: Ingestion and oral stereotypic behaviors
+    labels:
+      - eating_trough
+      - drinking_nipple
+      - sham_chewing_stress
+  social_behavior:
+    description: Conspecific interaction, play, and reproductive behavior
+    labels:
+      - nosing_conspecific
+      - mounting_estrus
+  aggression:
+    description: Agonistic behaviors and commercial pen welfare hazards
+    labels:
+      - head_knocking_aggression
+      - parallel_pressing
+      - tail_biting_cannibalism
+  unknown:
+    description: Unclassified behavior
+    labels:
+      - unknown

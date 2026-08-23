@@ -93,7 +93,7 @@
 * **Velocity Vectors**:
   $$\vec{v}(t) = \left( \frac{\Delta x}{\Delta t}, \frac{\Delta y}{\Delta t} \right), \quad \text{Speed } \|\vec{v}\| = \sqrt{v_x^2 + v_y^2} \text{ in m/s and km/h}$$
 * **Heading Orientation**:
-  $$\theta(t) = (\operatorname{atan2}(v_y, v_x) + 360^\circ) \bmod 360^\circ$$
+  $$\theta(t) = (\text{atan2}(v_y, v_x) + 360^\circ) \bmod 360^\circ$$
 * **Inter-Individual Distance (IID) Matrix**:
   $$\text{IID}(i, j) = \|\mathbf{p}_i(t) - \mathbf{p}_j(t)\|, \quad \text{Approach Rate } \dot{D} = \frac{d(\text{IID})}{dt}$$
 * **Canine Ethogram Classifier**: Maps kinematics and aspect ratios to 23 clinical behaviors across 5 categories (`locomotion`, `posture`, `social_behavior`, `aggression`, `maintenance`) using rolling temporal hysteresis majority voting.

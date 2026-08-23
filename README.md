@@ -44,7 +44,7 @@ AnimalLens solves the core bottleneck of modern video AI by computing differenti
 2. **Zero-Drift Multi-Animal Tracking**:
    * Employs 8-dimensional Kalman state estimation ($\mathbf{x} = [x, y, a, h, v_x, v_y, v_a, v_h]^T$) with Mahalanobis spatial gating, maintaining persistent identities (`DOG-01`, `DOG-02`) across occlusions and camera pans.
 3. **Rigorous Kinematics Engine**:
-   * Calculates instantaneous velocity vectors $\vec{v} = (\frac{\Delta x}{\Delta t}, \frac{\Delta y}{\Delta t})$, heading angles $\theta = \operatorname{atan2}(\Delta y, \Delta x)$, and pairwise Inter-Individual Distance ($\text{IID}$) matrices with 100% mathematical determinism.
+   * Calculates instantaneous velocity vectors $\vec{v} = (\frac{\Delta x}{\Delta t}, \frac{\Delta y}{\Delta t})$, heading angles $\theta = \text{atan2}(\Delta y, \Delta x)$, and pairwise Inter-Individual Distance ($\text{IID}$) matrices with 100% mathematical determinism.
 4. **Self-Improving Active Learning Loop**:
    * Gated uncertainty triage routes ambiguous interactions into MongoDB time-series collections for continuous fine-tuning.
 

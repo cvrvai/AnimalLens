@@ -11,8 +11,8 @@ from animallens.perception.models.yolov8_detector import YOLOv8Detector
 
 
 def render_running_dog(
-    video_path: str = "data/dog_running.mp4",
-    output_video: str = "data/annotated_greyhound_running.mp4",
+    video_path: str = "data/raw/videos/dog_running.mp4",
+    output_video: str = "data/outputs/videos/annotated_greyhound_running.mp4",
 ) -> list[str]:
     detector = YOLOv8Detector(conf_threshold=0.30)
     tracker = BoTSORTTracker()
@@ -124,7 +124,9 @@ def render_running_dog(
 
         # Save snapshots at key movement frames
         if frame_idx in (50, 120, 200, 280):
-            snap_path = Path("data") / f"annotated_greyhound_frame_{frame_idx}.jpg"
+            snap_dir = Path("data/outputs/snapshots")
+            snap_dir.mkdir(parents=True, exist_ok=True)
+            snap_path = snap_dir / f"annotated_greyhound_frame_{frame_idx}.jpg"
             cv2.imwrite(str(snap_path), annotated)
             saved_images.append(str(snap_path))
             print(f"Saved running dog snapshot: {snap_path.resolve()}")

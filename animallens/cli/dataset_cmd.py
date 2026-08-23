@@ -86,6 +86,35 @@ def split_dataset_cmd(
     with open(out_path / "test.json", "w", encoding="utf-8") as f:
         json.dump([s.model_dump() for s in result.test_samples], f, indent=2)
 
+    # Automatically construct YOLOv8 directory structure if source files exist
+    import shutil
+    base_raw_dir = Path(input_json).parent
+
+    for split_name, samples_list in [("train", result.train_samples), ("val", result.val_samples), ("test", result.test_samples)]:
+        split_img_dir = out_path / "images" / split_name
+        split_lbl_dir = out_path / "labels" / split_name
+        split_img_dir.mkdir(parents=True, exist_ok=True)
+        split_lbl_dir.mkdir(parents=True, exist_ok=True)
+
+        for s in samples_list:
+            src_img = base_raw_dir / s.file_path
+            if src_img.exists():
+                shutil.copy(src_img, split_img_dir / src_img.name)
+                src_lbl = base_raw_dir / "labels" / f"{src_img.stem}.txt"
+                if src_lbl.exists():
+                    shutil.copy(src_lbl, split_lbl_dir / src_lbl.name)
+
+    # Generate dataset.yaml
+    yaml_text = DatasetExporter.generate_yolo_yaml(
+        dataset_dir=out_path,
+        class_names=["cherax_quadricarinatus"],
+        train_path="images/train",
+        val_path="images/val",
+        test_path="images/test",
+    )
+    with open(out_path / "dataset.yaml", "w", encoding="utf-8") as yf:
+        yf.write(yaml_text)
+
     table = Table(title="Anti-Leakage Grouped Partition Summary", border_style="green")
     table.add_column("Split", style="bold")
     table.add_column("Sample Count", justify="right")
@@ -97,4 +126,4 @@ def split_dataset_cmd(
     table.add_row("[bold]Total[/bold]", f"[bold]{result.total_count}[/bold]", "-")
 
     console.print(table)
-    console.print(f"\n[green]Manifests saved to:[/green] {out_path.resolve()}\n")
+    console.print(f"\n[green]YOLO Dataset & Manifests saved to:[/green] {out_path.resolve()}\n")

@@ -1,7 +1,7 @@
 <div align="center">
 
-# 🐾 AnimalLens
-### Edge AI Animal Vision & Ethology Platform for Next.js & Modern Web Apps
+# AnimalLens
+### Edge AI Animal Vision and Ethology Platform for Next.js and Web Applications
 
 [![Next.js](https://img.shields.io/badge/Next.js-14%2F15-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
@@ -14,11 +14,15 @@
 
 Features out-of-the-box **Canine Vision AI** (*Canis lupus familiaris*) detecting gait, speed in km/h, posture, and social interactions at **>60 FPS**.
 
+<br/>
+
+<img src="docs/assets/architecture.svg" alt="AnimalLens System Architecture" width="100%" />
+
 </div>
 
 ---
 
-## ⚡ Next.js 3-Minute Quickstart
+## Next.js Quickstart
 
 Connect real-time animal vision intelligence to your Next.js application in 3 steps:
 
@@ -67,7 +71,7 @@ export async function POST(req: NextRequest) {
 
 ---
 
-### 3. Display AI Detections & Behavior Telemetry in React
+### 3. Display AI Detections and Behavior Telemetry in React
 
 Use standard React components to render the analysis results:
 
@@ -96,10 +100,10 @@ export default function AnimalLensDashboard() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto bg-slate-950 text-white rounded-2xl">
-      <h1 className="text-2xl font-bold mb-4">🐾 AnimalLens Canine Vision AI</h1>
+      <h1 className="text-2xl font-bold mb-4">AnimalLens Canine Vision AI</h1>
       <input type="file" accept="video/*" onChange={handleUpload} className="mb-6 block" />
 
-      {loading && <p className="text-cyan-400">Processing video at >60 FPS with BoT-SORT...</p>}
+      {loading && <p className="text-cyan-400">Processing video at &gt;60 FPS with BoT-SORT...</p>}
 
       {analysis && (
         <div className="space-y-4">
@@ -109,7 +113,7 @@ export default function AnimalLensDashboard() {
           </div>
 
           <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl">
-            <h2 className="text-lg font-semibold mb-2">Behavior Timeline & Kinematics</h2>
+            <h2 className="text-lg font-semibold mb-2">Behavior Timeline &amp; Kinematics</h2>
             <div className="space-y-2">
               {analysis.timeline?.map((entry: any, i: number) => (
                 <div key={i} className="flex justify-between items-center bg-slate-800/50 p-2 rounded">
@@ -131,7 +135,7 @@ export default function AnimalLensDashboard() {
 
 ---
 
-## 📡 Real-Time Live Camera Streaming (WebSockets)
+## Real-Time Live Camera Streaming (WebSockets)
 
 For live security cameras, USB webcams, or pet monitors, connect directly over WebSockets in Next.js:
 
@@ -161,7 +165,7 @@ export function useAnimalLensSocket() {
 
 ---
 
-## 📄 TypeScript Interface Reference
+## TypeScript Interface Reference
 
 ```typescript
 export interface AnimalAnalysisResult {
@@ -184,7 +188,7 @@ export interface BehaviorEvent {
   timestamp: number;
   subjects: SubjectTelemetry[];
   behavior: {
-    category: "locomotion" | "posture" | "social_behavior" | "aggression";
+    category: "locomotion" | "posture" | "social_behavior" | "aggression" | "maintenance";
     label: string;
     human_readable: string;
     confidence: number;
@@ -213,27 +217,34 @@ export interface SubjectTelemetry {
 
 ---
 
-## 🔬 Supported Canine Behaviors & Kinematics
+## Supported Canine Behaviors and Kinematics (23 Behaviors)
 
-| Category | Detected Actions | Kinematic Profile |
+<div align="center">
+  <img src="docs/assets/canine_ethogram.svg" alt="Canine Ethogram 23 Behaviors" width="100%" />
+</div>
+
+<br/>
+
+| Category | Detected Actions | Kinematic Criteria |
 | :--- | :--- | :--- |
-| **Locomotion** | `running_gallop`, `trot`, `walk` | Velocity $> 3.5\text{ m/s}$ (Gallop), $1.2-3.5\text{ m/s}$ (Trot), $0.3-1.2\text{ m/s}$ (Walk) |
-| **Posture** | `standing`, `sitting`, `lying_sternal` | Stationary velocity $< 0.3\text{ m/s}$ & aspect ratio posture geometry |
-| **Social Behavior** | `play_bow`, `following`, `greeting` | Inter-Individual Distance ($\text{IID} < 0.6\text{m}$) & reciprocal heading |
-| **Agonistic** | `aggressive_lunge`, `defensive_retreat` | Rapid approach acceleration & defensive spatial separation |
+| **Locomotion** | `running_gallop`, `trotting`, `walking`, `jumping`, `tail_wagging` | Velocity &gt; 3.5 m/s (Gallop), 1.2 - 3.5 m/s (Trot), 0.3 - 1.2 m/s (Walk) |
+| **Posture** | `standing`, `sitting`, `lying_sternal`, `lying_lateral`, `sleeping` | Stationary velocity &lt; 0.3 m/s and aspect ratio geometry |
+| **Social Behavior** | `play_bow`, `following`, `sniffing_conspecific`, `greeting`, `mounting` | Inter-Individual Distance (IID &lt; 0.6m) and heading alignment |
+| **Agonistic** | `aggressive_lunge`, `defensive_retreat`, `growling_stance`, `biting_grapple` | Rapid approach acceleration and spatial separation |
+| **Maintenance** | `eating`, `drinking`, `grooming_scratching`, `panting` | Head-down orientation and physiological baselines |
 
 ---
 
-## 🐍 Optional: Python Core Engine & Custom Training
+## Optional: Python Core Engine and Custom Model Training
 
-If you are a Machine Learning Engineer or Data Scientist who wants to fine-tune custom weights or run direct Python scripts:
+For Machine Learning Engineers who want to fine-tune custom weights or run Python scripts directly:
 
-### Install Python SDK:
+### Install Python Library:
 ```bash
 pip install git+https://github.com/cvrvai/AnimalLens.git
 ```
 
-### Python Script:
+### Python SDK Usage:
 ```python
 from animallens import AnimalLens
 
@@ -249,8 +260,8 @@ animallens serve --port 8000 --device cpu
 
 ---
 
-## 🤝 Contributing & License
+## Contributing and License
 
-Contributions for new React components, Next.js templates, and species adapters are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions for new React components, Next.js templates, and species adapters are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Licensed under the **Apache License, Version 2.0**.

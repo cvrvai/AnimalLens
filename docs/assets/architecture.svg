@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="360" rx="16" fill="url(#bgGrad)" stroke="#1e293b" stroke-width="2"/>
+
+  <!-- Left: Next.js Frontend Box -->
+  <g transform="translate(40, 50)">
+    <rect width="240" height="260" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+    <rect width="240" height="40" rx="12" fill="#0f172a"/>
+    <text x="120" y="26" fill="#f8fafc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" text-anchor="middle">Next.js Web Client</text>
+    <text x="120" y="75" fill="#38bdf8" font-family="monospace" font-size="12" text-anchor="middle">localhost:3000</text>
+    <line x1="20" y1="95" x2="220" y2="95" stroke="#334155" stroke-width="1"/>
+    <text x="30" y="125" fill="#94a3b8" font-family="sans-serif" font-size="12">Drag &amp; Drop Video Upload</text>
+    <text x="30" y="155" fill="#94a3b8" font-family="sans-serif" font-size="12">Interactive Canvas Overlays</text>
+    <text x="30" y="185" fill="#94a3b8" font-family="sans-serif" font-size="12">Kinematic Speed HUD</text>
+    <text x="30" y="215" fill="#94a3b8" font-family="sans-serif" font-size="12">Real-time WebSocket Feed</text>
+    <text x="30" y="245" fill="#94a3b8" font-family="sans-serif" font-size="12">Ethogram Timeline Table</text>
+  </g>
+
+  <!-- Middle Arrow Connection -->
+  <g transform="translate(295, 160)">
+    <path d="M 0 0 L 50 0" stroke="#06b6d4" stroke-width="3" stroke-dasharray="6,4"/>
+    <polygon points="50,-6 62,0 50,6" fill="#06b6d4"/>
+    <text x="30" y="-12" fill="#38bdf8" font-family="monospace" font-size="11" text-anchor="middle">REST / WS</text>
+  </g>
+
+  <!-- Right: AnimalLens Edge Vision Server -->
+  <g transform="translate(370, 50)">
+    <rect width="490" height="260" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+    <rect width="490" height="40" rx="12" fill="#0f172a"/>
+    <text x="245" y="26" fill="#f8fafc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" text-anchor="middle">AnimalLens Edge Vision API (localhost:8000)</text>
+
+    <!-- Sub Box: Layer A -->
+    <g transform="translate(20, 55)">
+      <rect width="450" height="110" rx="8" fill="#0f172a" stroke="#0ea5e9" stroke-width="1.5"/>
+      <text x="15" y="25" fill="#38bdf8" font-family="sans-serif" font-size="12" font-weight="700">Layer A: Vision Perception &amp; Kinematics (&gt;60 FPS)</text>
+      <text x="15" y="52" fill="#cbd5e1" font-family="sans-serif" font-size="12">• YOLOv8 Object Detection (Canine bounding boxes)</text>
+      <text x="15" y="74" fill="#cbd5e1" font-family="sans-serif" font-size="12">• BoT-SORT Kalman Multi-Animal Tracking (Persistent IDs)</text>
+      <text x="15" y="96" fill="#cbd5e1" font-family="sans-serif" font-size="12">• Mathematical Kinematics (Speed m/s, Heading deg, IID Matrix)</text>
+    </g>
+
+    <!-- Sub Box: Layer B -->
+    <g transform="translate(20, 180)">
+      <rect width="450" height="65" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
+      <text x="15" y="25" fill="#34d399" font-family="sans-serif" font-size="12" font-weight="700">Layer B: Multimodal Reasoning (Optional)</text>
+      <text x="15" y="48" fill="#cbd5e1" font-family="sans-serif" font-size="12">• Ollama Client (Gemma 3, Llama 3) for Biological Q&amp;A</text>
+    </g>
+  </g>
+</svg>

@@ -86,15 +86,16 @@ class AnimalLens:
         if isinstance(tracker, str):
             from animallens.perception.models.botsort_tracker import BoTSORTTracker
             resolved_tracker = BoTSORTTracker()
-        elif resolved_tracker is None:
-            from animallens.perception.models.botsort_tracker import BoTSORTTracker
-            resolved_tracker = BoTSORTTracker()
+        # Resolve pose estimator
+        from animallens.perception.models.yolov8_pose import YOLOv8PoseEstimator
+        resolved_pose = YOLOv8PoseEstimator()
 
         # Build Layer A perception pipeline
         self.pipeline = PerceptionPipeline(
             species_adapter=self.species_adapter,
             detector=resolved_detector,
             tracker=resolved_tracker,
+            pose_estimator=resolved_pose,
             buffer_duration_seconds=buffer_duration_seconds,
         )
 

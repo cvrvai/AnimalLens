@@ -82,9 +82,22 @@ class PerceptionPipeline:
         # 2. Tracking
         tracks = self.tracker.update(detections, timestamp=timestamp, frame=frame)
 
-        # 3. Pose Estimation (optional)
-        if self.pose_estimator:
-            tracks = self.pose_estimator.estimate_pose(frame, tracks)
+        # 3. Pose Estimation & Biomechanics
+        if self.pose_estimator and tracks:
+            bboxes = [t.current_bbox for t in tracks]
+            track_ids = [t.track_id for t in tracks]
+            poses = self.pose_estimator.estimate_pose(frame, bboxes=bboxes, track_ids=track_ids)
+            from animallens.analytics.pose_kinematics import PoseKinematicsEngine
+            from animallens.core.schemas import Keypoint as SchemaKeypoint
+
+            kinematics_engine = PoseKinematicsEngine()
+            for t, pose in zip(tracks, poses):
+                t.keypoints = [
+                    SchemaKeypoint(name=k.name, x=k.x, y=k.y, confidence=k.confidence)
+                    for k in pose.keypoints.values()
+                ]
+                bio = kinematics_engine.analyze_pose(pose)
+                t.attributes["biomechanics"] = bio.to_dict()
 
         # 4. Frame data assembly
         frame_data = FramePerceptionData(

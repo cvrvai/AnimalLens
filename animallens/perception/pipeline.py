@@ -26,7 +26,7 @@ from animallens.perception.base import (
 from animallens.perception.buffer import RollingVideoBuffer
 from animallens.perception.development.mock_detector import MockDetector
 from animallens.perception.development.mock_tracker import MockTracker
-from animallens.perception.development.redclaw_rules import RuleBasedRedclawClassifier
+from animallens.perception.temporal.classifier import TemporalBehaviorClassifier
 from animallens.species.base import SpeciesAdapter
 
 
@@ -50,7 +50,7 @@ class PerceptionPipeline:
         self.detector = detector or MockDetector(species_name=species_adapter.config.name)
         self.tracker = tracker or MockTracker()
         self.pose_estimator = pose_estimator
-        self.classifier = classifier or RuleBasedRedclawClassifier()
+        self.classifier = classifier or TemporalBehaviorClassifier()
 
         self.buffer = RollingVideoBuffer(
             capacity_seconds=buffer_duration_seconds,

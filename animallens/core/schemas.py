@@ -220,3 +220,21 @@ class AnalysisResult(BaseModel):
         for entry in self.timeline:
             lines.append(f"{entry.timestamp_str} {entry.behavior.capitalize()} (conf: {entry.confidence:.2f})")
         return "\n".join(lines) if lines else "No events detected."
+
+    def get_transition_matrix(self) -> Any:
+        """Compute Markov behavioral state transition probability matrix."""
+        from animallens.analytics.transition_matrix import compute_transition_matrix
+        return compute_transition_matrix(self.behaviors)
+
+    def get_spatial_metrics(self, arena_area: float = 1.0) -> Any:
+        """Compute spatial dispersion, Nearest Neighbor Distance (NND), and crowding intensity."""
+        from animallens.analytics.spatial_metrics import compute_spatial_metrics
+        all_subjects = []
+        for e in self.behaviors:
+            all_subjects.extend(e.subjects)
+        return compute_spatial_metrics(all_subjects, arena_area=arena_area)
+
+    def get_ethogram_summary(self) -> Any:
+        """Compute quantitative time budget and behavioral frequency distribution."""
+        from animallens.analytics.sampling_protocols import SamplingProtocols
+        return SamplingProtocols.compute_ethogram_time_budget(self.behaviors, total_duration=self.duration_seconds)

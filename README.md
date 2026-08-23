@@ -314,7 +314,8 @@ Detailed technical, mathematical, and execution documentation is available in th
 4. [Developer Guide & API Reference](docs/04_developer_guide.md): Python SDK, REST & WebSocket API, and custom species tutorial.
 5. [AI SDLC & Project Execution Playbook](docs/05_sdlc_and_execution_playbook.md): 7-Stage ML-SDLC framework, 12-week timeline, and founder task checklist.
 6. [Deep Learning & MongoDB Architecture](docs/06_ml_dl_and_mongodb_architecture.md): YOLOv8, BoT-SORT, temporal loss functions, and MongoDB time-series collections.
-7. [Gantt Chart & Kanban Roadmap](docs/07_gantt_chart_and_kanban_roadmap.md): Sprint task breakdown, Gantt timeline, and assignee tracking.
+7. [Agile Scrum Board & Sprint Delivery Hub](docs/07_agile_scrum_board.md): Sprint task breakdown and user stories.
+8. [AI Agent Governance & Evidence Protocol](docs/08_ai_agent_notion_governance_protocol.md): Notion-first planning hooks, verification requirements, and evidence audit trails.
 
 ---
 

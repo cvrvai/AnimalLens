@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "animallens"
-version = "0.1.0"
+version = "0.5.0"
 description = "Open Animal Behavior Intelligence Platform - Vision AI & Behavior Event Engine with optional LLM reasoning"
 readme = "README.md"
 authors = [

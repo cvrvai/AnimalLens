@@ -37,3 +37,9 @@ class ReasoningError(AnimalLensError):
 class RegistryError(AnimalLensError):
     """Raised when model registration, pulling, or discovery fails."""
     pass
+
+
+class ModelRegistryError(RegistryError):
+    """Raised when model pulling, checksum validation, or hub discovery fails."""
+    pass
+

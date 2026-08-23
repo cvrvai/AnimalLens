@@ -56,7 +56,7 @@ from animallens.species.base import (
 from animallens.species.redclaw.adapter import RedclawAdapter
 from animallens.species.registry import SpeciesRegistry, species_registry
 
-__version__ = "0.1.0"
+__version__ = "0.5.0"
 
 __all__ = [
     "AnimalLens",

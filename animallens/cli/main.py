@@ -19,6 +19,7 @@ from rich.console import Console
 from rich.panel import Panel
 import typer
 from animallens.cli.analyze_cmd import analyze_source_cli
+from animallens.cli.dataset_cmd import dataset_app
 from animallens.cli.doctor import print_doctor_report
 from animallens.cli.models_cmd import models_app, ollama_app, species_app
 from animallens.core.config import settings
@@ -32,6 +33,7 @@ app = typer.Typer(
 )
 
 # Register Sub-Apps
+app.add_typer(dataset_app, name="dataset")
 app.add_typer(models_app, name="models")
 app.add_typer(ollama_app, name="ollama")
 app.add_typer(species_app, name="species")

@@ -1,0 +1,60 @@
+version: "1.0.0"
+species_id: "cherax_quadricarinatus"
+categories:
+  locomotion:
+    description: "Movement patterns across substrate or water column"
+    labels:
+      - "normal_movement"
+      - "crawling"
+      - "swimming"
+      - "tail_flip_escape"
+  resting:
+    description: "Stationary behavior without active foraging or social interaction"
+    labels:
+      - "resting"
+      - "sheltering"
+      - "burrowing"
+  feeding:
+    description: "Food acquisition and consumption"
+    labels:
+      - "feeding"
+      - "foraging"
+      - "food_competition"
+  social_interaction:
+    description: "Non-aggressive conspecific interactions"
+    labels:
+      - "social_interaction"
+      - "approach"
+      - "following"
+      - "avoidance"
+      - "antennal_contact"
+  aggression:
+    description: "Agonistic encounters between crayfish"
+    labels:
+      - "aggression"
+      - "threat_display"
+      - "claw_sparring"
+      - "chasing"
+  reproduction:
+    description: "Mating and courtship rituals"
+    labels:
+      - "mating"
+      - "courtship"
+      - "copulatory_position"
+  maternal_behavior:
+    description: "Egg bearing and juvenile care"
+    labels:
+      - "egg_carrying"
+      - "egg_fanning"
+      - "juvenile_release"
+  abnormal_behavior:
+    description: "Pathological or distress indicators"
+    labels:
+      - "abnormal_inactivity"
+      - "disorientation"
+      - "molting_failure"
+      - "limb_loss"
+  unknown:
+    description: "Uncertain or novel behaviors requiring human review"
+    labels:
+      - "unknown"

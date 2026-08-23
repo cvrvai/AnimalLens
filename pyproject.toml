@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "animallens"
+version = "0.1.0"
+description = "Open Animal Behavior Intelligence Platform - Vision AI & Behavior Event Engine with optional LLM reasoning"
+readme = "README.md"
+authors = [
+    { name = "AnimalLens Open-Source Community", email = "community@animallens.org" }
+]
+license = { text = "Apache-2.0" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+keywords = ["animal-behavior", "computer-vision", "ai", "video-analysis", "ollama", "object-detection", "tracking"]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.5.0",
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "httpx>=0.26.0",
+    "numpy>=1.24.0",
+    "pyyaml>=6.0",
+    "pillow>=10.0.0",
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+vision = [
+    "opencv-python-headless>=4.8.0",
+    "torch>=2.0.0",
+    "ultralytics>=8.0.0",
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.12.0",
+    "ruff>=0.1.9",
+]
+all = [
+    "animallens[vision,dev]",
+]
+
+[project.scripts]
+animallens = "animallens.cli.main:app"
+
+[project.urls]
+Homepage = "https://github.com/animallens/animallens"
+Documentation = "https://docs.animallens.org"
+Repository = "https://github.com/animallens/animallens.git"
+Issues = "https://github.com/animallens/animallens/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["animallens*"]
+
+[tool.setuptools.package-data]
+animallens = ["species/**/*.yaml", "species/**/*.json"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --import-mode=importlib"
+testpaths = ["tests"]
+asyncio_mode = "auto"

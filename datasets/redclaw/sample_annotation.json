@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "dataset_name": "redclaw-behavior-benchmark-v1",
+  "species": {
+    "id": "cherax_quadricarinatus",
+    "name": "Redclaw Crayfish",
+    "scientific_name": "Cherax quadricarinatus"
+  },
+  "annotations": [
+    {
+      "video": "RC_CAM01_00128.mp4",
+      "fps": 30.0,
+      "event": {
+        "event_id": "ann_001",
+        "start": 38.4,
+        "end": 61.7,
+        "duration": 23.3,
+        "behavior": {
+          "category": "reproduction",
+          "label": "mating",
+          "confidence": 1.0
+        },
+        "actors": [
+          {
+            "track_id": 1,
+            "animal_id": "F_003",
+            "role": "female"
+          },
+          {
+            "track_id": 2,
+            "animal_id": "M_002",
+            "role": "male"
+          }
+        ]
+      }
+    },
+    {
+      "video": "RC_CAM01_00129.mp4",
+      "fps": 30.0,
+      "event": {
+        "event_id": "ann_002",
+        "start": 12.0,
+        "end": 18.5,
+        "duration": 6.5,
+        "behavior": {
+          "category": "aggression",
+          "label": "threat_display",
+          "confidence": 1.0
+        },
+        "actors": [
+          {
+            "track_id": 3,
+            "animal_id": "M_001",
+            "role": "initiator"
+          },
+          {
+            "track_id": 4,
+            "animal_id": "M_004",
+            "role": "responder"
+          }
+        ]
+      }
+    }
+  ]
+}

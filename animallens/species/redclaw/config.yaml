@@ -1,0 +1,17 @@
+id: "cherax_quadricarinatus"
+name: "Redclaw Crayfish"
+scientific_name: "Cherax quadricarinatus"
+taxonomy_version: "1.0.0"
+default_model: "redclaw-behavior-v1"
+detection_threshold: 0.45
+min_track_length: 3
+uncertainty_threshold: 0.45
+metadata:
+  habitat: "freshwater"
+  body_type: "crustacean"
+  key_structures:
+    - "chelae"
+    - "carapace"
+    - "abdomen"
+    - "uropods"
+    - "antennae"

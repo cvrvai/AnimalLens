@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Test & coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.coverage.*
+
+# AnimalLens local cache & temporary artifacts
+.cache/
+models/
+weights/
+runs/
+outputs/
+
+# ML weights & checkpoints
+*.pt
+*.pth
+*.onnx
+*.engine
+*.safetensors
+*.bin
+*.ckpt
+
+# Dataset media & raw recordings
+datasets/**/raw/
+datasets/**/clips/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+# Logs
+*.log
+logs/

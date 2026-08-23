@@ -16,32 +16,58 @@
 
 ---
 
-## 60-Second Quick Start
+## ⚡ 30-Second Quickstart (Copy & Run)
 
-### Installation
+Get running immediately with zero configuration. Choose your preferred workflow:
+
+### Option A: 💻 Command Line (Zero Python Code)
 
 ```bash
-pip install animallens
+# 1. Install AnimalLens
+pip install git+https://github.com/cvrvai/AnimalLens.git
+
+# 2. Run instant video analysis (automatic model download & BoT-SORT tracking)
+animallens analyze path/to/my_video.mp4 --species dog --format timeline
 ```
 
-### 3-Line Behavior Analysis
+---
+
+### Option B: 🐍 Python SDK (3-Line Integration)
 
 ```python
 from animallens import AnimalLens
 
-# Analyze dog locomotion & posture
-lens = AnimalLens(species="dog", reasoning="ollama:gemma3")
-result = lens.analyze("data/raw/videos/dog_running.mp4")
+# 1. Initialize for any species (dog, redclaw, etc.)
+lens = AnimalLens(species="dog")
 
+# 2. Analyze video or image
+result = lens.analyze("dog_video.mp4")
+
+# 3. Print human-readable ethogram timeline
 print(result.format_timeline_text())
 ```
 
-Output:
-```text
-00:00:00 Posture.standing (conf: 0.85)
-00:00:01 Locomotion.walking (conf: 0.87)
-00:00:02 Locomotion.running_gallop (conf: 0.94)
-00:00:03 Social_behavior.play_bow (conf: 0.92)
+---
+
+### Option C: 🐳 Docker 1-Liner (Instant REST & WebSocket Microservice)
+
+```bash
+# Run local API server on port 8000 (OpenAPI UI at http://localhost:8000/docs)
+docker run -p 8000:8000 ghcr.io/cvrvai/animallens:latest
+```
+
+---
+
+### Option D: 📹 Live Camera & RTSP Stream
+
+```python
+from animallens import AnimalLens
+
+lens = AnimalLens(species="dog")
+
+# Stream live behavior events directly from webcam (0) or RTSP camera
+for event in lens.stream(0):
+    print(f"[{event.temporal.start:.1f}s] {event.behavior.category}.{event.behavior.label} (Conf: {event.behavior.confidence:.1%})")
 ```
 
 ---

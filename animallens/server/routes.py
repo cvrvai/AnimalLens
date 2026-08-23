@@ -341,3 +341,82 @@ async def list_active_streams() -> Dict[str, Any]:
     return live_stream_manager.list_streams()
 
 
+# ---------------------------------------------------------------------------
+# Re-Identification (ReID) & Vector Gallery Endpoints
+# ---------------------------------------------------------------------------
+
+class RegisterIndividualRequest(BaseModel):
+    name: str
+    species: str = "dog"
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+_reid_gallery_instance = None
+
+def _get_gallery():
+    global _reid_gallery_instance
+    if _reid_gallery_instance is None:
+        from animallens.reid import ReIDGallery
+        _reid_gallery_instance = ReIDGallery()
+    return _reid_gallery_instance
+
+
+@router.get("/reid/gallery")
+async def get_reid_gallery() -> Dict[str, Any]:
+    """List all registered animal profiles in the ReID gallery."""
+    return _get_gallery().to_dict()
+
+
+@router.post("/reid/register")
+async def register_individual_endpoint(req: RegisterIndividualRequest) -> Dict[str, Any]:
+    """Register a named animal in the persistent ReID gallery."""
+    import numpy as np
+    dummy_vec = np.zeros(512, dtype=np.float32)
+    dummy_vec[0] = 1.0
+    prof = _get_gallery().register(req.name, dummy_vec, species=req.species, metadata=req.metadata)
+    return {
+        "status": "registered",
+        "name": prof.name,
+        "species": prof.species,
+        "metadata": prof.metadata,
+    }
+
+
+# ---------------------------------------------------------------------------
+# 1-Click Model Training REST Endpoints
+# ---------------------------------------------------------------------------
+
+class TrainRequest(BaseModel):
+    video_path: Optional[str] = None
+    dataset_yaml: Optional[str] = None
+    base_model: str = "yolov8s.pt"
+    epochs: int = 20
+    batch: int = 16
+    device: str = "cpu"
+
+
+@router.post("/train")
+async def trigger_training_endpoint(req: TrainRequest) -> Dict[str, Any]:
+    """Trigger 1-click model fine-tuning and return training report."""
+    from animallens.training import VideoDatasetBuilder, ModelTrainer
+    
+    if req.video_path:
+        builder = VideoDatasetBuilder()
+        builder.extract_keyframes(req.video_path, sample_fps=2.0)
+        builder.generate_pseudo_labels()
+        dataset_yaml = builder.write_yaml_config()
+    elif req.dataset_yaml:
+        dataset_yaml = req.dataset_yaml
+    else:
+        raise HTTPException(status_code=400, detail="Provide either video_path or dataset_yaml.")
+
+    trainer = ModelTrainer(base_model=req.base_model)
+    report = trainer.train(
+        dataset_yaml=dataset_yaml,
+        epochs=req.epochs,
+        batch=req.batch,
+        device=req.device,
+    )
+    return report.to_dict()
+
+

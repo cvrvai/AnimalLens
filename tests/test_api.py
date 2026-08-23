@@ -138,3 +138,21 @@ def test_tracking_and_kinematic_math():
     assert classified.category == "locomotion"
     assert classified.label == "running_gallop"
     assert classified.speed_kmh > 0
+
+
+def test_api_reid_gallery_and_register():
+    # Test register endpoint
+    res_reg = client.post(
+        "/v1/reid/register",
+        json={"name": "Max", "species": "dog", "metadata": {"breed": "Border Collie"}},
+    )
+    assert res_reg.status_code == 200
+    assert res_reg.json()["status"] == "registered"
+    assert res_reg.json()["name"] == "Max"
+
+    # Test gallery listing endpoint
+    res_gal = client.get("/v1/reid/gallery")
+    assert res_gal.status_code == 200
+    gal_data = res_gal.json()
+    assert gal_data["total_registered"] >= 1
+    assert any(p["name"] == "Max" for p in gal_data["profiles"])

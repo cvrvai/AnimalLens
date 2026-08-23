@@ -119,8 +119,9 @@ class VideoDatasetBuilder:
                 for box in res.bboxes:
                     # YOLO format: <class_id> <x_center> <y_center> <width> <height>
                     cls_id = 0
+                    cx, cy = box.center
                     lines.append(
-                        f"{cls_id} {box.x_center:.6f} {box.y_center:.6f} {box.width:.6f} {box.height:.6f}"
+                        f"{cls_id} {cx:.6f} {cy:.6f} {box.width:.6f} {box.height:.6f}"
                     )
 
                 txt_path.write_text("\n".join(lines), encoding="utf-8")

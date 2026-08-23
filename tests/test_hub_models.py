@@ -50,3 +50,34 @@ def test_model_registry_integration(tmp_path):
 
     pulled_path = reg.pull("redclaw-behavior-v1")
     assert pulled_path.exists()
+
+
+def test_canine_models_in_catalogue(tmp_path):
+    """Verify canine pose, detector, reid, and ethogram models are in catalogue."""
+    hub = HuggingFaceModelHub(cache_dir=tmp_path)
+    models = hub.list_official_models()
+    names = [m.name for m in models]
+
+    assert "canine-pose-v1" in names
+    assert "canine-detector-v1" in names
+    assert "canine-reid-v1" in names
+    assert "canine-ethogram-stgcn-v1" in names
+
+
+def test_model_card_generation(tmp_path):
+    """Verify automated Hugging Face README.md model card generation."""
+    from animallens.models.model_card import ModelCardGenerator
+
+    art = OFFICIAL_HUB_CATALOGUE["canine-pose-v1"]
+    card_text = ModelCardGenerator.generate(art)
+
+    assert "pipeline_tag: keypoint-detection" in card_text
+    assert "canine-pose-v1" in card_text
+    assert "canis_lupus_familiaris" in card_text
+    assert "Altmann" in card_text
+    assert "BoT-SORT" in card_text
+
+    card_path = ModelCardGenerator.write_to_file(tmp_path, art)
+    assert card_path.exists()
+    assert card_path.name == "README.md"
+    assert "keypoint-detection" in card_path.read_text(encoding="utf-8")

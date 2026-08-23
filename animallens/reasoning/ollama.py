@@ -218,26 +218,11 @@ class OllamaReasoningProvider(BaseReasoningProvider):
         frames: Optional[List[Any]] = None,
     ) -> ReasoningOutput:
         """Query Ollama with the behavior event context."""
+        from animallens.reasoning.prompts import PromptSynthesizer
+
         species_name = event.species.name
         system_prompt = self._build_system_prompt(species_name)
-
-        event_payload = {
-            "species": event.species.name,
-            "scientific_name": event.species.scientific_name,
-            "behavior_category": event.behavior.category,
-            "behavior_label": event.behavior.label,
-            "confidence": round(event.behavior.confidence, 3),
-            "subjects_involved": len(event.subjects),
-            "duration_seconds": event.temporal.duration,
-            "is_uncertain": event.behavior.is_uncertain,
-        }
-
-        prompt = (
-            f"Analyze this detected animal behavior event:\n"
-            f"```json\n{json.dumps(event_payload, indent=2)}\n```\n\n"
-            "Explain the ethological significance of this behavior, whether it indicates distress, reproduction, or normal maintenance, "
-            "and suggest relevant management actions."
-        )
+        prompt = PromptSynthesizer.build_event_prompt(event)
 
         encoded_images = []
         if self.is_vision_capable and frames:

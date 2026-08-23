@@ -85,16 +85,20 @@ def remove_alias(
 @app.command(name="serve")
 def serve_cmd(
     host: str = typer.Option("0.0.0.0", "--host", "-h", help="Host address to bind"),
-    port: int = typer.Option(8088, "--port", "-p", help="Port to listen on"),
+    port: int = typer.Option(8000, "--port", "-p", help="Port to listen on (default 8000)"),
+    device: str = typer.Option("cpu", "--device", "-d", help="Inference device (cpu, cuda:0, mps)"),
     reload: bool = typer.Option(False, "--reload", help="Enable auto-reload for development"),
 ) -> None:
-    """Start local AnimalLens REST and WebSocket API server."""
+    """Start local AnimalLens REST and WebSocket API server for web frontends."""
     console.print(Panel(
         f"[bold green]AnimalLens API Server starting on http://{host}:{port}[/bold green]\n\n"
+        f"  * Device Backend:           [cyan]{device}[/cyan]\n"
         f"  * Interactive OpenAPI Docs: [cyan]http://localhost:{port}/docs[/cyan]\n"
+        f"  * Video Analysis API:       [cyan]POST http://localhost:{port}/v1/analyze/video[/cyan]\n"
+        f"  * Image Analysis API:       [cyan]POST http://localhost:{port}/v1/analyze/image[/cyan]\n"
         f"  * WebSocket Realtime Feed:  [cyan]ws://localhost:{port}/v1/events[/cyan]\n"
         f"  * Health Endpoint:          [cyan]http://localhost:{port}/v1/health[/cyan]",
-        title="AnimalLens Server",
+        title="AnimalLens Microservice Server",
         border_style="green",
     ))
     try:

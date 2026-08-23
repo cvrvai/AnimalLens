@@ -43,11 +43,27 @@ class ModelPullRequest(BaseModel):
 
 @router.get("/health")
 async def health_check() -> Dict[str, Any]:
-    """Health check endpoint."""
+    """Health check endpoint returning device backend and installed models."""
+    device_info = "cpu"
+    cuda_available = False
+    try:
+        import torch
+        if torch.cuda.is_available():
+            device_info = f"cuda:{torch.cuda.current_device()} ({torch.cuda.get_device_name(0)})"
+            cuda_available = True
+        elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            device_info = "mps (Apple Silicon)"
+    except Exception:
+        pass
+
     return {
         "status": "healthy",
         "service": settings.app_name,
         "version": settings.app_version,
+        "device": device_info,
+        "cuda_available": cuda_available,
+        "installed_models": model_registry.list_installed(),
+        "available_species": [s["id"] for s in species_registry.list_species()],
     }
 
 

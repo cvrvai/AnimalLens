@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🐾 AnimalLens
+# AnimalLens
 ### Open Animal Behavior Intelligence Platform
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -16,7 +16,7 @@
 
 ---
 
-## ⚡ 60-Second Quick Start
+## 60-Second Quick Start
 
 ### Installation
 
@@ -45,7 +45,7 @@ Output:
 
 ---
 
-## 📐 System Architecture
+## System Architecture
 
 AnimalLens strictly separates **Layer A (Vision & Temporal Intelligence)** from **Layer B (Optional LLM Reasoning)**.
 
@@ -98,7 +98,7 @@ AnimalLens strictly separates **Layer A (Vision & Temporal Intelligence)** from 
 
 ---
 
-## 🚀 Usage Examples
+## Usage Examples
 
 ### 1. Single Image Analysis
 
@@ -155,7 +155,7 @@ print(answer)
 
 ---
 
-## 📋 Standard Behavior Event Schema
+## Standard Behavior Event Schema
 
 Every detected behavior produces a strongly-typed schema:
 
@@ -208,7 +208,7 @@ Every detected behavior produces a strongly-typed schema:
     "model": "gemma3",
     "summary": "Observed copulatory interaction between two mature Cherax quadricarinatus.",
     "recommendations": [
-      "Maintain stable water temperature at 26-28°C",
+      "Maintain stable water temperature at 26-28C",
       "Ensure sufficient shelter tiles to prevent post-copulatory aggression"
     ]
   }
@@ -217,7 +217,7 @@ Every detected behavior produces a strongly-typed schema:
 
 ---
 
-## 🛠️ CLI Reference
+## CLI Reference
 
 AnimalLens includes a full-featured CLI:
 
@@ -246,7 +246,7 @@ animallens serve --host 0.0.0.0 --port 8088
 
 ---
 
-## 🌐 REST & WebSocket API
+## REST & WebSocket API
 
 Start the server:
 ```bash
@@ -270,7 +270,7 @@ Interactive OpenAPI documentation is available at `http://localhost:8088/docs`.
 
 ---
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
 Run with Docker Compose:
 
@@ -282,7 +282,7 @@ The API will be available at `http://localhost:8088`.
 
 ---
 
-## 🧬 Extending AnimalLens (Adding a New Species)
+## Extending AnimalLens (Adding a New Species)
 
 Adding a new species (e.g. `pig`, `chicken`, `fish`) requires **zero changes** to AnimalLens Core. Simply create a new folder under `animallens/species/<species_id>/`:
 
@@ -304,7 +304,7 @@ species_registry.register_adapter("pig", PigAdapter())
 
 ---
 
-## 🗺️ Roadmap & Release Milestones
+## Roadmap & Release Milestones
 
 - [x] **v0.1 — Phase 1** (Current): Platform architecture, Layer A/B decoupling, Redclaw species adapter, Developer Python SDK, Typer CLI (`doctor`, `models`, `analyze`), FastAPI REST/WS server, and rolling video buffer.
 - [ ] **v0.2**: Real Redclaw detector & tracker (YOLOv8 + BoT-SORT fine-tuned on aquaculture datasets).
@@ -317,7 +317,7 @@ species_registry.register_adapter("pig", PigAdapter())
 
 ---
 
-## 🤝 Contributing & License
+## Contributing & License
 
 Contributions are welcome! Please check [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions.
 

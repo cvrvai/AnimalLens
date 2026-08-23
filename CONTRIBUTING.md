@@ -1,16 +1,16 @@
 # Contributing to AnimalLens
 
-Thank you for your interest in contributing to **AnimalLens**! 🐾
+Thank you for your interest in contributing to **AnimalLens**!
 
 AnimalLens is an open-source platform for animal behavior intelligence. We welcome contributions ranging from adding new species adapters and improving computer vision models, to enhancing the developer SDK, CLI, and documentation.
 
 ---
 
-## 🛠️ Development Setup
+## Development Setup
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/<your-username>/AnimalLens.git
+git clone https://github.com/cvrvai/AnimalLens.git
 cd AnimalLens
 ```
 
@@ -37,7 +37,7 @@ animallens doctor
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 Ensure all tests pass before submitting a pull request:
 ```bash
@@ -52,7 +52,7 @@ black --check .
 
 ---
 
-## 🧬 Adding a New Species Adapter
+## Adding a New Species Adapter
 
 AnimalLens is designed around pluggable species adapters. To add support for a new animal (e.g. `pig`, `chicken`, `fish`):
 
@@ -72,7 +72,7 @@ AnimalLens is designed around pluggable species adapters. To add support for a n
 
 ---
 
-## 📝 Pull Request Guidelines
+## Pull Request Guidelines
 
 1. **Keep Layer A & Layer B strictly decoupled**: Layer A (Computer Vision, Tracking, Kinematics, Temporal models) must remain 100% operational offline without requiring an LLM. Layer B (Ollama reasoning) is purely optional.
 2. **Never claim unverified accuracy**: When contributing baseline or heuristic rules, mark them clearly as development implementations.
@@ -81,6 +81,6 @@ AnimalLens is designed around pluggable species adapters. To add support for a n
 
 ---
 
-## 📄 License
+## License
 
 By contributing to AnimalLens, you agree that your contributions will be licensed under the **Apache License 2.0**.

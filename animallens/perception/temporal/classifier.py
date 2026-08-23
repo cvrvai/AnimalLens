@@ -118,14 +118,37 @@ class TemporalBehaviorClassifier(BaseBehaviorClassifier):
                     candidate_category = "feeding"
                     confidence = 0.87
 
-        # 3. Temporal Smoothing (Hysteresis majority voting to eliminate 1-frame noise)
+        # 3. Species-Specific Label Mapping (e.g. Canines vs Crustaceans)
+        is_canine = hasattr(species_adapter, "config") and "canis" in species_adapter.config.id.lower()
+
+        if is_canine:
+            if candidate_label in ("resting", "burrowing"):
+                candidate_label = "standing"
+                candidate_category = "posture"
+            elif candidate_label in ("foraging", "rapid_locomotion"):
+                candidate_label = "walking" if kinematics.mean_speed < 0.12 else "running_gallop"
+                candidate_category = "locomotion"
+            elif candidate_label in ("tail_flip_escape", "avoidance_retreat"):
+                candidate_label = "defensive_retreat"
+                candidate_category = "aggression"
+            elif candidate_label == "fighting":
+                candidate_label = "aggressive_lunge"
+                candidate_category = "aggression"
+            elif candidate_label in ("mating", "courtship"):
+                candidate_label = "play_bow" if duration < 3.0 else "following"
+                candidate_category = "social_behavior"
+
+        # 4. Temporal Smoothing (Hysteresis majority voting to eliminate 1-frame noise)
         self._history_labels.append(candidate_label)
         smoothed_label = collections.Counter(self._history_labels).most_common(1)[0][0]
 
         # Look up taxonomy category from species adapter
-        resolved_category = species_adapter.taxonomy.categories.get(
-            smoothed_label, candidate_category
-        ) if hasattr(species_adapter, "taxonomy") else candidate_category
+        resolved_category = candidate_category
+        if hasattr(species_adapter, "taxonomy") and species_adapter.taxonomy:
+            for cat_name, cat_obj in species_adapter.taxonomy.categories.items():
+                if smoothed_label in cat_obj.labels:
+                    resolved_category = cat_name
+                    break
 
         return [
             {

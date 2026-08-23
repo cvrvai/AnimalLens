@@ -2,7 +2,7 @@
 
 **Project**: AnimalLens — Open Animal Behavior Intelligence Platform  
 **Delivery Model**: Sequential Waterfall Flow (Strict Step-by-Step Dependency Execution)  
-**Execution Status**: **All 12 Phases 100% Completed & Verified (73/73 Tests Passing)**
+**Execution Status**: **All 14 Phases 100% Completed & Verified (80/80 Tests Passing)**
 
 ---
 
@@ -21,6 +21,8 @@ flowchart TD
     P9 --> P10["Phase 10: 1-Click Automated Model Training CLI (COMPLETED)"]
     P10 --> P11["Phase 11: Deep Metric Re-Identification (COMPLETED)"]
     P11 --> P12["Phase 12: Production Desktop & Cloud GPU Deployments (COMPLETED)"]
+    P12 --> P13["Phase 13: Hugging Face Pretrained Weights Hub & Model Cards (COMPLETED)"]
+    P13 --> P14["Phase 14: Swine / Pig Ethology & Commercial Welfare Intelligence (COMPLETED)"]
 
     style P1 fill:#d1fae5,stroke:#059669,stroke-width:2px;
     style P2 fill:#d1fae5,stroke:#059669,stroke-width:2px;
@@ -34,6 +36,8 @@ flowchart TD
     style P10 fill:#d1fae5,stroke:#059669,stroke-width:2px;
     style P11 fill:#d1fae5,stroke:#059669,stroke-width:2px;
     style P12 fill:#d1fae5,stroke:#059669,stroke-width:2px;
+    style P13 fill:#d1fae5,stroke:#059669,stroke-width:2px;
+    style P14 fill:#d1fae5,stroke:#059669,stroke-width:2px;
 ```
 
 ---
@@ -104,3 +108,14 @@ flowchart TD
 * 12.1 **TSK-1201**: Production Docker Compose Stack with NVIDIA Container Toolkit (`commit: 6a8de2b`)
 * 12.2 **TSK-1202**: Multi-Container Orchestration (Vision Microservice + MongoDB + Ollama) (`commit: 6a8de2b`)
 * 12.3 **TSK-1203**: ReID Gallery & Model Training REST Endpoints (`commit: 7e0e52e`)
+
+### Phase 13: Hugging Face Pretrained Weights Hub & Model Cards ✅ (COMPLETED)
+* 13.1 **TSK-1301**: Expanded Model Catalogue (`canine-pose-v1`, `canine-detector-v1`, `canine-reid-v1`, `canine-ethogram-stgcn-v1`) (`commit: 65a808e`)
+* 13.2 **TSK-1302**: Hugging Face Model Card Generator with YAML Frontmatter (`models/model_card.py`) (`commit: 65a808e`)
+* 13.3 **TSK-1303**: CLI Model Management Commands (`animallens models info / push`) (`commit: 65a808e`)
+
+### Phase 14: Swine / Pig Ethology & Commercial Welfare Intelligence ✅ (COMPLETED)
+* 14.1 **TSK-1401**: Swine 18-Behavior Taxonomy Adapter (`species/pig/`) (`commit: c4c2fdd`)
+* 14.2 **TSK-1402**: Clinical Recumbency Posture Classifier (Sternal vs Lateral vs Standing) (`commit: c4c2fdd`)
+* 14.3 **TSK-1403**: Commercial Barn Huddling Index & Thermal Cold Stress Detection Engine (`commit: c4c2fdd`)
+* 14.4 **TSK-1404**: Swine Model Fine-Tuning CLI (`animallens train --species pig --video <path>`) (`commit: c4c2fdd`)

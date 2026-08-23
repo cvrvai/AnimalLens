@@ -227,6 +227,30 @@ export interface SubjectTelemetry {
     x_max: number;
     y_max: number;
   };
+  keypoints?: Keypoint[]; // 24-point anatomical skeleton
+  attributes?: {
+    biomechanics?: BiomechanicalMetrics;
+  };
+}
+
+export interface Keypoint {
+  name: string;
+  x: number; // Normalized [0.0 - 1.0]
+  y: number; // Normalized [0.0 - 1.0]
+  confidence: number;
+}
+
+export interface BiomechanicalMetrics {
+  spine_flexion_angle_deg: number;
+  left_elbow_angle_deg: number;
+  right_elbow_angle_deg: number;
+  left_stifle_angle_deg: number;
+  right_stifle_angle_deg: number;
+  head_pitch_angle_deg: number;
+  is_play_bow: boolean;
+  is_hunched_posture: boolean;
+  gait_asymmetry_score: number; // 0.0 (symmetric) to 1.0 (severe lameness)
+  veterinary_gait_classification: string;
 }
 ```
 

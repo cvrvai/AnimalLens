@@ -38,8 +38,11 @@ app.add_typer(models_app, name="models")
 app.add_typer(ollama_app, name="ollama")
 app.add_typer(species_app, name="species")
 
+from animallens.cli.train_cmd import train_model_cli
+
 # Add Root Level Direct Aliases for Developer Friendliness
 app.command(name="analyze")(analyze_source_cli)
+app.command(name="train")(train_model_cli)
 
 
 @app.command(name="doctor")

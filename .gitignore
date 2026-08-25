@@ -40,10 +40,10 @@ htmlcov/
 
 # AnimalLens local cache & temporary artifacts
 .cache/
-models/
-weights/
-runs/
-outputs/
+/models/
+/weights/
+/runs/
+/outputs/
 
 # ML weights & checkpoints
 *.pt

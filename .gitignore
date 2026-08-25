@@ -66,3 +66,11 @@ datasets/**/clips/
 # Logs
 *.log
 logs/
+
+# Frontend / Next.js
+node_modules/
+.next/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+

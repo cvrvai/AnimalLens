@@ -3,8 +3,10 @@ FastAPI application entrypoint for AnimalLens server.
 """
 from __future__ import annotations
 
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from animallens.core.config import settings
 from animallens.server.routes import router
 
@@ -20,7 +22,7 @@ def create_app() -> FastAPI:
         openapi_url="/v1/openapi.json",
     )
 
-    # Enable CORS for cross-platform clients, web dashboards, and ERPs
+    # Enable CORS for cross-platform clients, Next.js web dashboards, and ERPs
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -30,6 +32,13 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(router)
+
+    # Ensure static directories exist and mount them for frontend media access
+    for dir_name in ["datasets", "models", "data"]:
+        p = Path(dir_name)
+        p.mkdir(parents=True, exist_ok=True)
+        app.mount(f"/static/{dir_name}", StaticFiles(directory=str(p)), name=f"{dir_name}_static")
+
     return app
 
 

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
+import time
 from typing import Any, AsyncIterator, Dict, Iterator, List, Optional, Union
 from PIL import Image
 from animallens.core.config import settings
@@ -28,6 +29,20 @@ from animallens.sources.stream import StreamSource
 from animallens.sources.video import VideoSource
 from animallens.species.base import SpeciesAdapter
 from animallens.species.registry import species_registry
+
+VALID_LIFECYCLE_STAGES = {"craylet", "juvenile", "sub-adult", "adult"}
+
+
+def normalize_lifecycle_stage(val: Any) -> Optional[str]:
+    """
+    Normalize lifecycle stage string to canonical hyphenated form:
+    'craylet', 'juvenile', 'sub-adult', or 'adult'.
+    Returns None if val is not a recognized lifecycle stage.
+    """
+    if not val or not isinstance(val, str):
+        return None
+    normalized = val.strip().lower().replace("_", "-")
+    return normalized if normalized in VALID_LIFECYCLE_STAGES else None
 
 
 class AnimalLens:
@@ -156,10 +171,51 @@ class AnimalLens:
         detected_events: List[BehaviorEvent] = []
         raw_frames = []
 
+        t0 = time.time()
         for ts, frame in source:
             raw_frames.append(frame)
             events = self.pipeline.process_frame(frame, timestamp=ts, source_info=src_info)
             detected_events.extend(events)
+
+        elapsed_ms = round((time.time() - t0) * 1000, 2)
+        flat_detections: List[Dict[str, Any]] = []
+        if self.pipeline.buffer._perception_data:
+            latest_frame = self.pipeline.buffer._perception_data[-1]
+            for track in latest_frame.tracks:
+                b = track.current_bbox
+                cx = (b.x_min + b.x_max) / 2.0
+                cy = (b.y_min + b.y_max) / 2.0
+                w = b.width
+                h = b.height
+
+                area = b.area
+                # 1. Resolve stage from explicit track attributes ('stage' or 'class_name')
+                stage = normalize_lifecycle_stage(track.attributes.get("stage"))
+                if not stage:
+                    stage = normalize_lifecycle_stage(track.attributes.get("class_name"))
+
+                # 2. Fall back to normalized bounding box area thresholds
+                if not stage:
+                    if area < 0.02:
+                        stage = "craylet"
+                    elif area < 0.08:
+                        stage = "juvenile"
+                    elif area < 0.18:
+                        stage = "sub-adult"
+                    else:
+                        stage = "adult"
+
+                flat_detections.append({
+                    "track_id": track.track_id,
+                    "x": cx,
+                    "y": cy,
+                    "w": w,
+                    "h": h,
+                    "bbox": [b.x_min, b.y_min, b.x_max, b.y_max],
+                    "confidence": round(track.confidence, 2),
+                    "species": getattr(getattr(self.species_adapter, "config", None), "id", "redclaw"),
+                    "stage": stage,
+                })
 
         # Attach reasoning if provider is enabled
         reasoning_out: Optional[ReasoningOutput] = None
@@ -205,6 +261,9 @@ class AnimalLens:
             duration_seconds=0.0,
             behaviors=detected_events,
             timeline=timeline,
+            count=len(flat_detections),
+            detections=flat_detections,
+            processing_time_ms=elapsed_ms,
             summary=reasoning_out.summary if reasoning_out else f"Analyzed image for {self.species_name}.",
             reasoning=reasoning_out,
         )

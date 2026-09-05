@@ -1,0 +1,14 @@
+datasets/
+tests/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+.git/
+.gitignore
+.env*
+!models/trained/crayfish_multistage/weights/best.pt
+!models/trained/crayfish_multistage/metrics.json

@@ -207,6 +207,9 @@ class AnalysisResult(BaseModel):
     duration_seconds: float = 0.0
     behaviors: List[BehaviorEvent] = Field(default_factory=list)
     timeline: List[TimelineEntry] = Field(default_factory=list)
+    count: int = 0
+    detections: List[Dict[str, Any]] = Field(default_factory=list)
+    processing_time_ms: float = 0.0
     summary: Optional[str] = None
     reasoning: Optional[ReasoningOutput] = None
     created_at: float = Field(default_factory=lambda: time.time())

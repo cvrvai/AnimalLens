@@ -17,6 +17,7 @@ from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile, Web
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from animallens.core.config import settings
+from animallens.core.exceptions import SourceError
 from animallens.core.schemas import AnalysisResult, BehaviorEvent
 from animallens.models.registry import model_registry
 from animallens.reasoning.ollama import OllamaClient
@@ -135,10 +136,21 @@ async def list_ollama_models() -> Dict[str, Any]:
     }
 
 
+def _resolve_param(query_val: Optional[str], form_val: Optional[str], default: Optional[str] = None) -> Optional[str]:
+    """Resolve parameter checking query string first, then form-data, falling back to default."""
+    if query_val is not None and query_val.strip() != "":
+        return query_val.strip()
+    if form_val is not None and form_val.strip() != "":
+        return form_val.strip()
+    return default
+
+
 @router.post("/analyze/image", response_model=AnalysisResult)
 async def analyze_image_endpoint(
-    species: str = Form("dog"),
-    reasoning: Optional[str] = Form(None),
+    species: Optional[str] = Query(None),
+    species_form: Optional[str] = Form(None, alias="species"),
+    reasoning: Optional[str] = Query(None),
+    reasoning_form: Optional[str] = Form(None, alias="reasoning"),
     file: Optional[UploadFile] = File(None),
 ) -> AnalysisResult:
     """Analyze an uploaded image for animal behaviors."""
@@ -146,8 +158,24 @@ async def analyze_image_endpoint(
         raise HTTPException(status_code=400, detail="Image file must be uploaded.")
 
     content = await file.read()
-    lens = AnimalLens(species=species, reasoning=reasoning)
-    result = lens.analyze_image(content)
+    if not content:
+        raise HTTPException(status_code=400, detail="Image file is empty (0 bytes).")
+
+    target_species = _resolve_param(species, species_form, default="redclaw")
+    target_reasoning = _resolve_param(reasoning, reasoning_form, default=None)
+
+    lens = AnimalLens(species=target_species, reasoning=target_reasoning)
+    try:
+        result = lens.analyze_image(content)
+    except HTTPException:
+        raise
+    except (SourceError, ValueError, Exception) as err:
+        raise HTTPException(status_code=400, detail=f"Invalid image format: {err}")
+
+    if target_species.lower() in ("redclaw", "cherax_quadricarinatus"):
+        result.species = "redclaw"
+    else:
+        result.species = lens.species_name
 
     # Broadcast events to connected WebSockets
     for event in result.behaviors:
@@ -168,8 +196,10 @@ async def analyze_image_endpoint(
 
 @router.post("/analyze/video", response_model=AnalysisResult)
 async def analyze_video_endpoint(
-    species: str = Form("dog"),
-    reasoning: Optional[str] = Form(None),
+    species: Optional[str] = Query(None),
+    species_form: Optional[str] = Form(None, alias="species"),
+    reasoning: Optional[str] = Query(None),
+    reasoning_form: Optional[str] = Form(None, alias="reasoning"),
     sample_fps: float = Form(5.0),
     max_duration_seconds: Optional[float] = Form(None),
     file: Optional[UploadFile] = File(None),
@@ -178,13 +208,16 @@ async def analyze_video_endpoint(
     if not file:
         raise HTTPException(status_code=400, detail="Video file must be uploaded.")
 
+    target_species = _resolve_param(species, species_form, default="redclaw")
+    target_reasoning = _resolve_param(reasoning, reasoning_form, default=None)
+
     suffix = os.path.splitext(file.filename or "video.mp4")[1]
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         shutil.copyfileobj(file.file, tmp)
         tmp_path = tmp.name
 
     try:
-        lens = AnimalLens(species=species, reasoning=reasoning)
+        lens = AnimalLens(species=target_species, reasoning=target_reasoning)
         result = lens.analyze_video(
             tmp_path,
             sample_fps=sample_fps,
@@ -198,7 +231,13 @@ async def analyze_video_endpoint(
 
 @router.websocket("/events")
 async def websocket_events_endpoint(websocket: WebSocket) -> None:
-    """WebSocket endpoint for receiving real-time behavior events."""
+    """WebSocket endpoint for receiving real-time behavior and telemetry events."""
+    from animallens.server.websocket import authenticate_websocket, ws_manager
+
+    # Enforce API Key authentication when ANIMALLENS_API_KEY is configured
+    if not await authenticate_websocket(websocket):
+        return
+
     await ws_manager.connect(websocket)
     try:
         while True:
@@ -207,11 +246,10 @@ async def websocket_events_endpoint(websocket: WebSocket) -> None:
             # Handle client ping
             if data == "ping":
                 await websocket.send_text(json.dumps({"type": "pong"}))
-    except WebSocketDisconnect:
+    except (WebSocketDisconnect, Exception) as e:
+        logger.debug(f"WebSocket client disconnected or closed: {e}")
+    finally:
         ws_manager.disconnect(websocket)
-
-
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 # ---------------------------------------------------------------------------
@@ -620,6 +658,11 @@ async def get_training_job_status_endpoint(job_id: str) -> Dict[str, Any]:
 @router.websocket("/train/ws/{job_id}")
 async def training_telemetry_websocket(websocket: WebSocket, job_id: str) -> None:
     """Real-time WebSocket stream of training epoch loss curves and validation metrics."""
+    from animallens.server.websocket import authenticate_websocket
+
+    if not await authenticate_websocket(websocket):
+        return
+
     from animallens.training import training_manager
 
     job = training_manager.get_job(job_id)

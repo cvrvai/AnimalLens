@@ -15,3 +15,9 @@ metadata:
     - "abdomen"
     - "uropods"
     - "antennae"
+classes:
+  - "crayfish"
+  - "craylet"
+  - "juvenile"
+  - "sub_adult"
+  - "adult"

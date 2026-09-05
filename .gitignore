@@ -54,9 +54,10 @@ htmlcov/
 *.bin
 *.ckpt
 
-# Dataset media & raw recordings
-datasets/**/raw/
-datasets/**/clips/
+# Dataset media & raw recordings (pulled via scripts/pull_roboflow_dataset.py)
+datasets/
+!datasets/crayfish_combined/dataset.yaml
+
 *.mp4
 *.mov
 *.avi

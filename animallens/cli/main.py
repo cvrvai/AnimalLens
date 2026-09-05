@@ -15,6 +15,9 @@ if hasattr(sys.stdout, "reconfigure"):
     except Exception:
         pass
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from rich.console import Console
 from rich.panel import Panel
 import typer
@@ -88,7 +91,7 @@ def remove_alias(
 @app.command(name="serve")
 def serve_cmd(
     host: str = typer.Option("0.0.0.0", "--host", "-h", help="Host address to bind"),
-    port: int = typer.Option(8000, "--port", "-p", help="Port to listen on (default 8000)"),
+    port: int = typer.Option(8088, "--port", "-p", help="Port to listen on (default 8088)"),
     device: str = typer.Option("cpu", "--device", "-d", help="Inference device (cpu, cuda:0, mps)"),
     reload: bool = typer.Option(False, "--reload", help="Enable auto-reload for development"),
 ) -> None:

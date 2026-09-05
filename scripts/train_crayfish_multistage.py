@@ -90,6 +90,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Resume training from last checkpoint",
     )
+    parser.add_argument(
+        "--patience",
+        type=int,
+        default=25,
+        help="Early stopping patience epochs (default: 25)",
+    )
     return parser.parse_args()
 
 
@@ -160,6 +166,7 @@ def train_crayfish_model(
     device: Optional[str] = None,
     workers: int = 0,
     resume: bool = False,
+    patience: int = 25,
 ) -> Dict[str, Any]:
     """Execute YOLOv8 training and return training report dictionary."""
     exp_dir = project_dir / exp_name
@@ -200,6 +207,7 @@ def train_crayfish_model(
                 "name": exp_name,
                 "exist_ok": True,
                 "verbose": True,
+                "patience": patience,
             }
 
         logger.info("=" * 70)
@@ -351,6 +359,7 @@ def main() -> None:
         device=args.device,
         workers=args.workers,
         resume=args.resume,
+        patience=args.patience,
     )
 
     best_pt = Path(report["best_weights_path"])

@@ -72,7 +72,7 @@ class YOLOv8Detector(BaseDetector):
     def model_name(self) -> str:
         return "yolov8"
 
-    def detect(self, frame: Any, confidence_threshold: float = 0.45) -> DetectionResult:
+    def detect(self, frame: Any, confidence_threshold: float = 0.55) -> DetectionResult:
         """Run object detection on frame, returning normalized bounding boxes."""
         # Check if frame is PIL or numpy
         h, w = 480, 640

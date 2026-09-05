@@ -23,9 +23,9 @@ class RedclawAdapter(SpeciesAdapter):
             scientific_name="Cherax quadricarinatus",
             taxonomy_version="1.0.0",
             default_model="redclaw-behavior-v1",
-            detection_threshold=0.45,
+            detection_threshold=0.55,
             min_track_length=3,
-            uncertainty_threshold=0.45,
+            uncertainty_threshold=0.55,
         )
 
     def default_taxonomy(self) -> BehaviorTaxonomy:

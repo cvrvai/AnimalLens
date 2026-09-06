@@ -78,7 +78,7 @@ class YOLOv8Detector(BaseDetector):
     def model_name(self) -> str:
         return "yolov8"
 
-    def detect(self, frame: Any, confidence_threshold: float = 0.55) -> DetectionResult:
+    def detect(self, frame: Any, confidence_threshold: float = 0.30) -> DetectionResult:
         """Run object detection on frame, returning normalized bounding boxes."""
         # Check if frame is PIL or numpy
         h, w = 480, 640
@@ -131,6 +131,17 @@ class YOLOv8Detector(BaseDetector):
 
                 if bboxes:
                     return DetectionResult(bboxes=bboxes, confidences=confidences, class_names=class_names)
+
+                # On real camera photos (which have sensor noise & color gradients), honest 0 detections
+                # must be preserved. Never hallucinate phantom boxes on water bubbles or tray reflections.
+                img_check = np.array(frame) if hasattr(frame, "__array_interface__") or hasattr(frame, "convert") else frame
+                if isinstance(img_check, np.ndarray) and img_check.ndim >= 2:
+                    corner = img_check[: min(30, h), : min(30, w)]
+                    if corner.size > 0:
+                        flat_corner = corner.reshape(-1, corner.shape[-1]) if corner.ndim == 3 else corner.reshape(-1, 1)
+                        if len(np.unique(flat_corner, axis=0)) > 5:
+                            return DetectionResult(bboxes=[], confidences=[], class_names=[])
+
             except Exception as e:
                 import logging
                 logging.getLogger(__name__).warning(f"Ultralytics inference failed ({e}), falling back to adaptive tray heuristics")

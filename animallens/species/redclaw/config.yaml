@@ -3,7 +3,7 @@ name: "Redclaw Crayfish"
 scientific_name: "Cherax quadricarinatus"
 taxonomy_version: "1.0.0"
 default_model: "redclaw-behavior-v1"
-detection_threshold: 0.55
+detection_threshold: 0.30
 min_track_length: 3
 uncertainty_threshold: 0.55
 metadata:

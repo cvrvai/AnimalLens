@@ -20,10 +20,16 @@ class YOLOv8Detector(BaseDetector):
         self,
         model_path: Optional[Union[str, Path]] = None,
         classes: Optional[List[str]] = None,
-        device: str = "cpu",
+        device: Optional[str] = None,
     ) -> None:
         self.model_path = Path(model_path) if model_path else None
         self.classes = classes or ["crayfish"]
+        if device is None:
+            try:
+                import torch
+                device = "0" if torch.cuda.is_available() else "cpu"
+            except Exception:
+                device = "cpu"
         self.device = device
         self._model = None
         self._backend = "fallback"

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import io
 import json
 import os
 import sys
@@ -17,10 +18,16 @@ import urllib.error
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+if sys.platform == "win32" and hasattr(sys.stdout, "buffer"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+
 try:
     from dotenv import load_dotenv
     _script_dir = Path(__file__).resolve().parent
+    # Load AnimalLens .env
     load_dotenv(_script_dir.parent / ".env")
+    # Load aquaculture-system-next .env
+    load_dotenv(_script_dir.parent.parent / "AIC-main-core" / "aquaculture-system-next" / ".env")
     load_dotenv(Path.cwd() / ".env")
 except ImportError:
     pass
@@ -142,11 +149,21 @@ def call_ollama_detect(
         data = json.loads(resp.read().decode())
 
     content = data.get("message", {}).get("content") or data.get("response") or "{}"
+    parsed = {}
     try:
         parsed = json.loads(content)
     except Exception:
         clean = content.replace("```json", "").replace("```", "").strip()
-        parsed = json.loads(clean)
+        try:
+            parsed = json.loads(clean)
+        except Exception:
+            s = clean.find("{")
+            e = clean.rfind("}")
+            if s != -1 and e > s:
+                try:
+                    parsed = json.loads(clean[s:e+1])
+                except Exception:
+                    pass
 
     raw_list = parsed.get("detections") or parsed.get("objects") or parsed.get("boxes") or []
     boxes = []
@@ -166,7 +183,8 @@ def upload_annotation_to_roboflow(
     yolo_string: str,
 ) -> bool:
     """Upload YOLO annotation directly to Roboflow project."""
-    url = f"{ROBOFLOW_API_URL}/dataset/{project}/annotate/{image_id}?api_key={api_key}&name={urllib.request.quote(image_name)}&overwrite=true"
+    annotation_filename = f"{Path(image_name).stem}.txt"
+    url = f"{ROBOFLOW_API_URL}/dataset/{project}/annotate/{image_id}?api_key={api_key}&name={urllib.request.quote(annotation_filename)}&overwrite=true"
     payload = json.dumps({
         "annotationFile": yolo_string,
         "labelmap": {"0": "early_juvenile"}
@@ -177,6 +195,10 @@ def upload_annotation_to_roboflow(
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read().decode())
             return bool(data.get("success", True))
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8", errors="replace")
+        print(f"  [Roboflow Upload Error {e.code}] {err_body}")
+        return False
     except Exception as e:
         print(f"  [Roboflow Upload Error] {e}")
         return False
@@ -187,10 +209,14 @@ def main():
     parser.add_argument("--batch", type=str, help="Roboflow Batch ID to process (or 'all')", default=None)
     parser.add_argument("--ollama-key", type=str, help="Ollama Cloud API Key", default=None)
     parser.add_argument("--endpoint", type=str, help="Ollama Endpoint", default="https://ollama.com")
-    parser.add_argument("--model", type=str, help="Ollama Vision Model", default="llama3.2-vision")
+    parser.add_argument("--model", type=str, help="Ollama Vision Model", default="gemma4:31b")
     parser.add_argument("--limit", type=int, help="Max images to process", default=50)
     parser.add_argument("--save-local", action="store_true", help="Save copy to local YOLO format", default=True)
     args = parser.parse_args()
+
+    # Auto-map local model to Ollama Cloud model if endpoint is cloud
+    if "ollama.com" in args.endpoint and args.model in ("llama3.2-vision", "qwen2.5-vl"):
+        args.model = "gemma4:31b"
 
     rf_key = os.environ.get("ROBOFLOW_API_KEY", "WuOsvQe8dthqEbBCpGj0").strip()
     rf_workspace = os.environ.get("ROBOFLOW_WORKSPACE", "cc-aryuc").strip()
